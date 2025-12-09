@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Add User{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto bg-white shadow rounded-lg p-6 mt-8">
+    <h2 class="text-xl font-semibold mb-4">Add New User</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label class="block mb-2">Username</label>
+        <input type="text" name="username" required
+               class="w-full border rounded px-3 py-2 mb-4">
+
+        <label class="block mb-2">Email</label>
+        <input type="email" name="email" required
+               class="w-full border rounded px-3 py-2 mb-4">
+
+        <label class="block mb-2">Phone Number</label>
+        <input type="text" name="phone" required
+               class="w-full border rounded px-3 py-2 mb-4">
+
+        <label class="block mb-2">Role</label>
+        <select name="role" class="w-full border rounded px-3 py-2 mb-4">
+            <option value="SELLER">Seller</option>
+            <option value="TENANT">Tenant</option>
+        </select>
+
+        <label class="block mb-2">Password</label>
+        <input type="password" name="password" required
+               class="w-full border rounded px-3 py-2 mb-4">
+
+        <button type="submit"
+            class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+            Create User
+        </button>
+    </form>
+
+    <div class="mt-4 text-center">
+        <a href="{% url 'admin-users' %}" class="text-blue-600 hover:underline">
+            ← Back to Users
+        </a>
+    </div>
+</div>
+{% endblock %}

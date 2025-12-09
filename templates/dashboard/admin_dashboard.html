@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard | RentalHub{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-6">
+
+  <!-- Header + quick links -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold">Admin Dashboard</h1>
+      <p class="text-sm text-gray-500">
+        Overview of users, properties, bookings and payments.
+      </p>
+    </div>
+
+    <div class="flex flex-wrap gap-2 text-sm">
+      <a href="{% url 'admin-users' %}" class="px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200">
+        Manage Users
+      </a>
+      <a href="{% url 'admin-properties' %}" class="px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200">
+        Manage Properties
+      </a>
+      <a href="{% url 'admin-payments' %}" class="px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200">
+        Manage Payments
+      </a>
+    </div>
+  </div>
+
+  <!-- Top stats -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="bg-white rounded-xl shadow-sm p-4">
+      <p class="text-xs uppercase text-gray-500 mb-1">Users</p>
+      <p class="text-2xl font-semibold mb-1">{{ total_users }}</p>
+      <p class="text-xs text-gray-500">
+        Sellers: <span class="font-medium">{{ total_sellers }}</span> ·
+        Tenants: <span class="font-medium">{{ total_tenants }}</span>
+      </p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm p-4">
+      <p class="text-xs uppercase text-gray-500 mb-1">Properties</p>
+      <p class="text-2xl font-semibold mb-1">{{ total_properties }}</p>
+      <p class="text-xs text-gray-500">
+        Total active listings in the system.
+      </p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm p-4">
+      <p class="text-xs uppercase text-gray-500 mb-1">Bookings & Payments</p>
+      <p class="text-lg font-semibold mb-1">{{ total_bookings }} bookings</p>
+      <p class="text-xs text-gray-500">
+        Payments recorded: <span class="font-medium">{{ total_payments }}</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Pending items -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="bg-white rounded-xl shadow-sm p-4">
+      <div class="flex items-center justify-between mb-2">
+        <p class="text-sm font-semibold">Pending Payments</p>
+        <a href="{% url 'admin-payments' %}" class="text-xs text-blue-600 hover:underline">
+          View details →
+        </a>
+      </div>
+      <p class="text-3xl font-bold mb-1">{{ pending_payments }}</p>
+      <p class="text-xs text-gray-500">
+        Payments awaiting admin approval.
+      </p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm p-4">
+      <div class="flex items-center justify-between mb-2">
+        <p class="text-sm font-semibold">Pending Visit Requests</p>
+        <!-- later you can link to a visits page -->
+      </div>
+      <p class="text-3xl font-bold mb-1">{{ pending_visits }}</p>
+      <p class="text-xs text-gray-500">
+        Visit requests from tenants that are still pending.
+      </p>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

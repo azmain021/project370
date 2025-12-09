@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto py-8 px-4">
+  <h1 class="text-2xl font-bold mb-6 flex items-center justify-between">
+    Manage Users
+    <a href="{% url 'admin-add-user' %}" 
+       class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
+        + Add User
+    </a>
+</h1>
+
+
+  <!-- Sellers -->
+  <div class="bg-white shadow rounded-lg p-4 mb-8">
+    <h2 class="text-lg font-semibold mb-3">Sellers</h2>
+
+    {% if sellers %}
+      <table class="w-full text-sm">
+        <thead class="border-b text-left text-gray-500">
+          <tr>
+            <th class="py-2">Username</th>
+            <th class="py-2">Email</th>
+            <th class="py-2">Phone</th>
+            <th class="py-2">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for s in sellers %}
+          <tr class="border-b last:border-0">
+            <td class="py-2">{{ s.username }}</td>
+            <td class="py-2">{{ s.email }}</td>
+            <td class="py-2">{{ s.phone }}</td>
+            <td class="py-2">
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="user_id" value="{{ s.id }}">
+                <button class="px-3 py-1 text-xs rounded bg-red-600 text-white">
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No sellers found.</p>
+    {% endif %}
+  </div>
+
+  <!-- Tenants -->
+  <div class="bg-white shadow rounded-lg p-4 mb-8">
+    <h2 class="text-lg font-semibold mb-3">Tenants</h2>
+
+    {% if tenants %}
+      <table class="w-full text-sm">
+        <thead class="border-b text-left text-gray-500">
+          <tr>
+            <th class="py-2">Username</th>
+            <th class="py-2">Email</th>
+            <th class="py-2">Phone</th>
+            <th class="py-2">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for t in tenants %}
+          <tr class="border-b last:border-0">
+            <td class="py-2">{{ t.username }}</td>
+            <td class="py-2">{{ t.email }}</td>
+            <td class="py-2">{{ t.phone }}</td>
+            <td class="py-2">
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="user_id" value="{{ t.id }}">
+                <button class="px-3 py-1 text-xs rounded bg-red-600 text-white">
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No tenants found.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

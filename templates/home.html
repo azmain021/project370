@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Home | RentalHub{% endblock %}
+
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center">
+  <div class="max-w-2xl w-full bg-white shadow-md rounded-2xl p-8">
+
+    <h1 class="text-3xl font-bold mb-3">Welcome to RentalHub</h1>
+    <p class="text-gray-600 mb-6">
+      A simple rental management system where admins manage the platform, sellers list
+      properties, and tenants request visits and bookings.
+    </p>
+
+    {# If an ADMIN is already logged in, show a small info box #}
+    {% if user.is_authenticated and user.role == "ADMIN" %}
+      <div class="mb-6 p-4 rounded-lg bg-blue-50 border border-blue-100 text-sm">
+        Logged in as: <strong>{{ user.username }} ({{ user.role }})</strong>.
+        Go to your
+        <a href="{% url 'admin-dashboard' %}" class="text-blue-600 underline">
+          Admin Dashboard
+        </a>.
+      </div>
+    {% endif %}
+
+    {# If logged OUT, show only Seller & Tenant login cards (NO admin card) #}
+    {% if not user.is_authenticated %}
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+        <!-- Seller card -->
+        <div class="border rounded-xl p-4">
+          <h2 class="font-semibold mb-2">Seller / Owner</h2>
+          <p class="text-gray-600 mb-3">
+            List properties and see your current tenants and bookings.
+          </p>
+          <a href="{% url 'login' %}" class="text-blue-600 hover:underline">
+            Seller Login →
+          </a>
+        </div>
+
+        <!-- Tenant card -->
+        <div class="border rounded-xl p-4">
+          <h2 class="font-semibold mb-2">Tenant</h2>
+          <p class="text-gray-600 mb-3">
+            Browse properties, request visits and confirm bookings.
+          </p>
+          <a href="{% url 'login' %}" class="text-blue-600 hover:underline">
+            Tenant Login →
+          </a>
+        </div>
+      </div>
+
+      <p class="mt-6 text-xs text-gray-400">
+        *For demo: use the pre-created accounts your team defines (e.g. seller1 / tenant1).
+      </p>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

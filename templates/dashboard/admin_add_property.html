@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Add Property{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto bg-white shadow rounded-lg p-6 mt-8">
+  <h2 class="text-xl font-semibold mb-4">Add New Property</h2>
+
+  <form method="POST">
+    {% csrf_token %}
+
+    <label class="block mb-2">Seller</label>
+    <select name="seller" class="w-full border rounded px-3 py-2 mb-4" required>
+      <option value="">-- Select Seller --</option>
+      {% for s in sellers %}
+        <option value="{{ s.id }}">{{ s.username }} ({{ s.email }})</option>
+      {% endfor %}
+    </select>
+
+    <label class="block mb-2">Title</label>
+    <input type="text" name="title" class="w-full border rounded px-3 py-2 mb-4" required>
+
+    <label class="block mb-2">Address</label>
+    <textarea name="address" class="w-full border rounded px-3 py-2 mb-4" required></textarea>
+
+    <label class="block mb-2">City</label>
+    <input type="text" name="city" class="w-full border rounded px-3 py-2 mb-4" required>
+
+    <label class="block mb-2">Property Type</label>
+    <select name="property_type" class="w-full border rounded px-3 py-2 mb-4" required>
+      <option value="FLAT">Flat</option>
+      <option value="HOUSE">House</option>
+      <option value="ROOM">Room</option>
+    </select>
+
+    <label class="block mb-2">Rent Amount</label>
+    <input type="number" name="rent_amount" step="0.01"
+           class="w-full border rounded px-3 py-2 mb-4" required>
+
+    <label class="block mb-2">Status</label>
+    <select name="status" class="w-full border rounded px-3 py-2 mb-4" required>
+      <option value="AVAILABLE">Available</option>
+      <option value="NOT_AVAILABLE">Not Available</option>
+    </select>
+
+    <label class="block mb-2">Description (optional)</label>
+    <textarea name="description" class="w-full border rounded px-3 py-2 mb-4"></textarea>
+
+    <button type="submit"
+            class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+      Create Property
+    </button>
+  </form>
+
+  <div class="mt-4 text-center">
+    <a href="{% url 'admin-properties' %}" class="text-blue-600 hover:underline">
+      ← Back to Properties
+    </a>
+  </div>
+</div>
+{% endblock %}
