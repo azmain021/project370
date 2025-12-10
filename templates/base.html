@@ -8,29 +8,58 @@
 
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .hover-lift {
+            transition: all 0.2s ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-2px);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #3b82f6 0%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 text-gray-900">
+<body class="bg-gradient-to-br from-blue-50 via-pink-50 to-orange-50 min-h-screen">
 
     <!-- Top Navbar -->
-    <nav class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="{% url 'home' %}" class="flex items-center gap-2">
-                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white text-lg font-bold">
-                    R
-                </span>
-                <span class="font-semibold text-lg">RentalHub</span>
+    <nav class="bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <a href="{% url 'home' %}" class="flex items-center gap-3 group hover-lift">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-pink-500 flex items-center justify-center shadow-md">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                </div>
+                <span class="font-bold text-xl gradient-text">RentalHub</span>
             </a>
 
             <div class="flex items-center gap-4 text-sm">
                 {% if user.is_authenticated %}
-                    <span class="hidden sm:inline text-gray-600">
-                        {{ user.username }} ({{ user.role }})
-                    </span>
-                    <a href="{% url 'logout' %}" class="text-red-600 hover:text-red-700">
+                    <div class="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-pink-50 rounded-full border border-blue-100">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-pink-400 flex items-center justify-center text-white font-semibold text-xs shadow-sm">
+                            {{ user.username|first|upper }}
+                        </div>
+                        <span class="text-gray-700 font-medium">{{ user.username }}</span>
+                        <span class="px-2 py-0.5 bg-white rounded-full text-xs font-medium text-blue-600 shadow-sm">{{ user.role }}</span>
+                    </div>
+                    <a href="{% url 'logout' %}" class="px-5 py-2 rounded-full text-red-600 hover:bg-red-50 transition-colors font-medium">
                         Logout
                     </a>
                 {% else %}
-                    <a href="{% url 'login' %}" class="text-blue-600 hover:text-blue-700">
+                    <a href="{% url 'login' %}" class="px-6 py-2 rounded-full bg-gradient-to-r from-blue-500 to-pink-500 text-white font-medium hover:shadow-lg hover-lift">
                         Login
                     </a>
                 {% endif %}
@@ -39,7 +68,7 @@
     </nav>
 
     <!-- Page Content -->
-    <main class="max-w-7xl mx-auto px-4 py-6">
+    <main class="max-w-7xl mx-auto px-4 py-8">
         {% block content %}{% endblock %}
     </main>
 

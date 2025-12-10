@@ -2,55 +2,106 @@
 {% block title %}Home | RentalHub{% endblock %}
 
 {% block content %}
-<div class="min-h-[70vh] flex items-center justify-center">
-  <div class="max-w-2xl w-full bg-white shadow-md rounded-2xl p-8">
+<div class="min-h-[70vh] flex items-center justify-center py-12">
+  <div class="max-w-3xl w-full">
 
-    <h1 class="text-3xl font-bold mb-3">Welcome to RentalHub</h1>
-    <p class="text-gray-600 mb-6">
-      A simple rental management system where admins manage the platform, sellers list
-      properties, and tenants request visits and bookings.
-    </p>
+    <!-- Hero Section -->
+    <div class="text-center mb-12">
+      <div class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-500 to-pink-500 shadow-xl mb-6">
+        <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+      </div>
+      <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-pink-600 bg-clip-text text-transparent">
+        Welcome to RentalHub
+      </h1>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+        Your friendly rental management platform connecting property owners with renters
+      </p>
+    </div>
 
     {# If an ADMIN is already logged in, show a small info box #}
     {% if user.is_authenticated and user.role == "ADMIN" %}
-      <div class="mb-6 p-4 rounded-lg bg-blue-50 border border-blue-100 text-sm">
-        Logged in as: <strong>{{ user.username }} ({{ user.role }})</strong>.
-        Go to your
-        <a href="{% url 'admin-dashboard' %}" class="text-blue-600 underline">
-          Admin Dashboard
-        </a>.
+      <div class="mb-8 p-6 rounded-2xl bg-gradient-to-r from-blue-50 to-pink-50 border-2 border-blue-100 shadow-lg">
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-gray-700 mb-1">
+              Logged in as <strong class="text-blue-600">{{ user.username }}</strong> <span class="px-2 py-0.5 bg-white rounded-full text-xs font-medium text-blue-600">{{ user.role }}</span>
+            </p>
+            <a href="{% url 'admin-dashboard' %}" class="inline-flex items-center gap-1 text-blue-600 font-medium hover:text-blue-700">
+              Go to your Admin Dashboard
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
+        </div>
       </div>
     {% endif %}
 
     {# If logged OUT, show only Seller & Tenant login cards (NO admin card) #}
     {% if not user.is_authenticated %}
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Seller card -->
-        <div class="border rounded-xl p-4">
-          <h2 class="font-semibold mb-2">Seller / Owner</h2>
-          <p class="text-gray-600 mb-3">
-            List properties and see your current tenants and bookings.
+        <div class="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-blue-200 hover:-translate-y-1">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold mb-3 text-gray-800">Property Owner</h2>
+          <p class="text-gray-600 mb-5 leading-relaxed">
+            List your properties, manage bookings, and connect with potential tenants seamlessly.
           </p>
-          <a href="{% url 'login' %}" class="text-blue-600 hover:underline">
-            Seller Login →
+          <a href="{% url 'login' %}" class="inline-flex items-center gap-2 text-blue-600 font-semibold hover:gap-3 transition-all">
+            Get Started
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
           </a>
         </div>
 
         <!-- Tenant card -->
-        <div class="border rounded-xl p-4">
-          <h2 class="font-semibold mb-2">Tenant</h2>
-          <p class="text-gray-600 mb-3">
-            Browse properties, request visits and confirm bookings.
+        <div class="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-pink-200 hover:-translate-y-1">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold mb-3 text-gray-800">Find Your Home</h2>
+          <p class="text-gray-600 mb-5 leading-relaxed">
+            Discover amazing properties, schedule visits, and book your perfect rental space.
           </p>
-          <a href="{% url 'login' %}" class="text-blue-600 hover:underline">
-            Tenant Login →
+          <a href="{% url 'login' %}" class="inline-flex items-center gap-2 text-pink-600 font-semibold hover:gap-3 transition-all">
+            Start Searching
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
           </a>
         </div>
       </div>
 
-      <p class="mt-6 text-xs text-gray-400">
-        *For demo: use the pre-created accounts your team defines (e.g. seller1 / tenant1).
-      </p>
+      <div class="mt-10 text-center">
+        <div class="inline-block bg-white rounded-2xl px-6 py-4 shadow-md">
+          <p class="text-xs text-gray-500 mb-2 font-medium">Demo Accounts</p>
+          <div class="flex flex-wrap gap-4 justify-center text-xs">
+            <div class="text-gray-600">
+              <span class="font-semibold text-gray-800">Seller:</span> <code class="px-2 py-1 bg-blue-50 rounded">seller1</code>
+            </div>
+            <div class="text-gray-600">
+              <span class="font-semibold text-gray-800">Tenant:</span> <code class="px-2 py-1 bg-pink-50 rounded">tenant1</code>
+            </div>
+            <div class="text-gray-600">
+              <span class="font-semibold text-gray-800">Password:</span> <code class="px-2 py-1 bg-gray-100 rounded">1234</code>
+            </div>
+          </div>
+        </div>
+      </div>
     {% endif %}
 
   </div>
