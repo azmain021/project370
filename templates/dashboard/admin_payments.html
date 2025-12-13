@@ -3,82 +3,86 @@
 
 {% block content %}
 <div class="max-w-5xl mx-auto py-8 px-4">
-  <h1 class="text-2xl font-bold mb-6">Manage Payments</h1>
+  <h1 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Manage Payments</h1>
 
   <!-- Pending Payments Section -->
-  <div class="bg-white shadow rounded-lg p-4 mb-8">
-    <h2 class="text-lg font-semibold mb-3">Pending Payments</h2>
+  <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 mb-8 border border-gray-200 dark:border-gray-700">
+    <h2 class="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Pending Payments</h2>
 
     {% if pending_payments %}
-      <table class="w-full text-sm">
-        <thead class="border-b text-left text-gray-500">
-          <tr>
-            <th class="py-2">ID</th>
-            <th class="py-2">Property</th>
-            <th class="py-2">Tenant</th>
-            <th class="py-2">Amount</th>
-            <th class="py-2">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-        {% for p in pending_payments %}
-          <tr class="border-b last:border-0">
-            <td class="py-2">#{{ p.id }}</td>
-            <td class="py-2">{{ p.booking.property.title }}</td>
-            <td class="py-2">{{ p.booking.tenant.username }}</td>
-            <td class="py-2">{{ p.amount }}</td>
-            <td class="py-2">
-              <form method="post">
-                {% csrf_token %}
-                <input type="hidden" name="payment_id" value="{{ p.id }}">
-                <button
-                  class="px-3 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700"
-                >
-                  Approve
-                </button>
-              </form>
-            </td>
-          </tr>
-        {% endfor %}
-        </tbody>
-      </table>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="border-b border-gray-200 dark:border-gray-600 text-left text-gray-500 dark:text-gray-400">
+            <tr>
+              <th class="py-2 px-3">ID</th>
+              <th class="py-2 px-3">Property</th>
+              <th class="py-2 px-3">Tenant</th>
+              <th class="py-2 px-3">Amount</th>
+              <th class="py-2 px-3">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for p in pending_payments %}
+            <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors last:border-0">
+              <td class="py-2 px-3 text-gray-900 dark:text-gray-100">#{{ p.id }}</td>
+              <td class="py-2 px-3 text-gray-900 dark:text-gray-100">{{ p.booking.property.title }}</td>
+              <td class="py-2 px-3 text-gray-900 dark:text-gray-100">{{ p.booking.tenant.username }}</td>
+              <td class="py-2 px-3 text-gray-900 dark:text-gray-100">{{ p.amount }}</td>
+              <td class="py-2 px-3">
+                <form method="post" class="inline">
+                  {% csrf_token %}
+                  <input type="hidden" name="payment_id" value="{{ p.id }}">
+                  <button
+                    class="px-3 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700 transition-colors"
+                  >
+                    Approve
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
     {% else %}
-      <p class="text-gray-500 text-sm">No pending payments.</p>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">No pending payments.</p>
     {% endif %}
   </div>
 
   <!-- Approved Payments -->
-  <div class="bg-white shadow rounded-lg p-4">
-    <h2 class="text-lg font-semibold mb-3">Recently Approved</h2>
+  <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+    <h2 class="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Recently Approved</h2>
 
     {% if approved_payments %}
-      <table class="w-full text-sm">
-        <thead class="border-b text-left text-gray-500">
-          <tr>
-            <th class="py-2">ID</th>
-            <th class="py-2">Booking</th>
-            <th class="py-2">Amount</th>
-            <th class="py-2">Platform Cut</th>
-            <th class="py-2">Seller Amount</th>
-            <th class="py-2">Approved By</th>
-          </tr>
-        </thead>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="border-b border-gray-200 dark:border-gray-600 text-left text-gray-500 dark:text-gray-400">
+            <tr>
+              <th class="py-2 px-3">ID</th>
+              <th class="py-2 px-3">Booking</th>
+              <th class="py-2 px-3">Amount</th>
+              <th class="py-2 px-3">Platform Cut</th>
+              <th class="py-2 px-3">Seller Amount</th>
+              <th class="py-2 px-3">Approved By</th>
+            </tr>
+          </thead>
 
-        <tbody>
-        {% for p in approved_payments %}
-          <tr class="border-b last:border-0">
-            <td class="py-2">#{{ p.id }}</td>
-            <td class="py-2">#{{ p.booking.id }}</td>
-            <td class="py-2">{{ p.amount }}</td>
-            <td class="py-2">{{ p.platform_cut }}</td>
-            <td class="py-2">{{ p.seller_amount }}</td>
-            <td class="py-2">{{ p.approved_by_admin.username }}</td>
-          </tr>
-        {% endfor %}
-        </tbody>
-      </table>
+          <tbody>
+          {% for p in approved_payments %}
+            <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors last:border-0">
+              <td class="py-2 px-3 text-gray-900 dark:text-gray-100">#{{ p.id }}</td>
+              <td class="py-2 px-3 text-gray-900 dark:text-gray-100">#{{ p.booking.id }}</td>
+              <td class="py-2 px-3 text-gray-900 dark:text-gray-100">${{ p.amount }}</td>
+              <td class="py-2 px-3 text-gray-900 dark:text-gray-100">${{ p.platform_cut }}</td>
+              <td class="py-2 px-3 text-gray-900 dark:text-gray-100">${{ p.seller_amount }}</td>
+              <td class="py-2 px-3 text-gray-900 dark:text-gray-100">{{ p.approved_by_admin.username }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
     {% else %}
-      <p class="text-gray-500 text-sm">No approvals yet.</p>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">No approvals yet.</p>
     {% endif %}
   </div>
 </div>

@@ -1,58 +1,368 @@
 {% extends "base.html" %}
-{% block title %}Home | RentalHub{% endblock %}
+{% block title %}Find Your Perfect Home | RentalHub{% endblock %}
 
 {% block content %}
-<div class="min-h-[70vh] flex items-center justify-center">
-  <div class="max-w-2xl w-full bg-white shadow-md rounded-2xl p-8">
 
-    <h1 class="text-3xl font-bold mb-3">Welcome to RentalHub</h1>
-    <p class="text-gray-600 mb-6">
-      A simple rental management system where admins manage the platform, sellers list
-      properties, and tenants request visits and bookings.
-    </p>
-
-    {# If an ADMIN is already logged in, show a small info box #}
-    {% if user.is_authenticated and user.role == "ADMIN" %}
-      <div class="mb-6 p-4 rounded-lg bg-blue-50 border border-blue-100 text-sm">
-        Logged in as: <strong>{{ user.username }} ({{ user.role }})</strong>.
-        Go to your
-        <a href="{% url 'admin-dashboard' %}" class="text-blue-600 underline">
-          Admin Dashboard
-        </a>.
-      </div>
-    {% endif %}
-
-    {# If logged OUT, show only Seller & Tenant login cards (NO admin card) #}
-    {% if not user.is_authenticated %}
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-        <!-- Seller card -->
-        <div class="border rounded-xl p-4">
-          <h2 class="font-semibold mb-2">Seller / Owner</h2>
-          <p class="text-gray-600 mb-3">
-            List properties and see your current tenants and bookings.
-          </p>
-          <a href="{% url 'login' %}" class="text-blue-600 hover:underline">
-            Seller Login →
-          </a>
-        </div>
-
-        <!-- Tenant card -->
-        <div class="border rounded-xl p-4">
-          <h2 class="font-semibold mb-2">Tenant</h2>
-          <p class="text-gray-600 mb-3">
-            Browse properties, request visits and confirm bookings.
-          </p>
-          <a href="{% url 'login' %}" class="text-blue-600 hover:underline">
-            Tenant Login →
-          </a>
+{# Admin Dashboard Quick Access #}
+{% if user.is_authenticated and user.role == "ADMIN" %}
+  <div class="mb-6 px-6 py-4 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-xl">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <i class="fas fa-user-shield text-3xl"></i>
+        <div>
+          <p class="font-semibold text-lg">Welcome back, {{ user.username }}!</p>
+          <p class="text-blue-100 text-sm">Administrator Access</p>
         </div>
       </div>
-
-      <p class="mt-6 text-xs text-gray-400">
-        *For demo: use the pre-created accounts your team defines (e.g. seller1 / tenant1).
-      </p>
-    {% endif %}
-
+      <a href="{% url 'admin-dashboard' %}" class="px-6 py-2.5 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+        <i class="fas fa-tachometer-alt mr-2"></i>Go to Dashboard
+      </a>
+    </div>
   </div>
-</div>
+{% endif %}
+
+<!-- Hero Section -->
+<section class="relative overflow-hidden rounded-3xl mb-16 shadow-2xl">
+  <!-- Background with Overlay -->
+  <div class="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-indigo-900/90 z-10"></div>
+  <div class="absolute inset-0 z-0">
+    <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200&h=600&fit=crop" 
+         alt="Modern Home" 
+         class="w-full h-full object-cover">
+  </div>
+  
+  <!-- Hero Content -->
+  <div class="relative z-20 px-8 py-24 md:py-32 lg:py-40">
+    <div class="max-w-4xl mx-auto text-center text-white">
+      <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+        Find Your Dream Home
+        <span class="block text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-indigo-300 mt-2">
+          Start Your Journey Today
+        </span>
+      </h1>
+      <p class="text-xl md:text-2xl text-blue-100 mb-10 max-w-2xl mx-auto">
+        Discover thousands of properties, connect with trusted owners, and find the perfect place to call home.
+      </p>
+      
+      <!-- CTA Buttons -->
+      <div class="flex flex-wrap items-center justify-center gap-4">
+        {% if not user.is_authenticated %}
+          <a href="{% url 'login' %}" class="px-8 py-4 bg-white text-blue-600 rounded-xl font-bold text-lg shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all hover:bg-blue-50">
+            <i class="fas fa-search mr-2"></i>Browse Properties
+          </a>
+          <a href="{% url 'login' %}" class="px-8 py-4 bg-transparent border-2 border-white text-white rounded-xl font-bold text-lg hover:bg-white hover:text-blue-600 transition-all">
+            <i class="fas fa-user-plus mr-2"></i>List Your Property
+          </a>
+        {% else %}
+          <a href="#properties" class="px-8 py-4 bg-white text-blue-600 rounded-xl font-bold text-lg shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all">
+            <i class="fas fa-home mr-2"></i>View Properties
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  
+  <!-- Decorative Wave -->
+  <div class="absolute bottom-0 left-0 right-0 z-20">
+    <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="rgb(248 250 252)"/>
+    </svg>
+  </div>
+</section>
+
+<!-- Stats Section -->
+<section class="mb-16">
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+    <div class="text-center p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1">
+      <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+        <i class="fas fa-building text-white text-2xl"></i>
+      </div>
+      <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-1">5,000+</h3>
+      <p class="text-gray-600 dark:text-gray-300">Properties</p>
+    </div>
+    
+    <div class="text-center p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1">
+      <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+        <i class="fas fa-users text-white text-2xl"></i>
+      </div>
+      <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-1">12,000+</h3>
+      <p class="text-gray-600 dark:text-gray-300">Happy Tenants</p>
+    </div>
+    
+    <div class="text-center p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1">
+      <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+        <i class="fas fa-user-tie text-white text-2xl"></i>
+      </div>
+      <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-1">3,500+</h3>
+      <p class="text-gray-600 dark:text-gray-300">Property Owners</p>
+    </div>
+    
+    <div class="text-center p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1">
+      <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+        <i class="fas fa-star text-white text-2xl"></i>
+      </div>
+      <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-1">4.9/5</h3>
+      <p class="text-gray-600 dark:text-gray-300">Rating</p>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Properties -->
+<section id="properties" class="mb-16">
+  <div class="text-center mb-12">
+    <h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+      Featured Properties
+    </h2>
+    <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+      Discover our handpicked selection of premium properties
+    </p>
+  </div>
+  
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <!-- Property Card 1 -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all transform hover:-translate-y-2 group">
+      <div class="relative overflow-hidden h-64">
+        <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=500&h=400&fit=crop" 
+             alt="Modern Apartment" 
+             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+        <div class="absolute top-4 right-4 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full font-bold shadow-lg">
+          $2,500/mo
+        </div>
+        <div class="absolute top-4 left-4 px-3 py-1 bg-green-500 text-white rounded-full text-sm font-semibold">
+          Available
+        </div>
+      </div>
+      <div class="p-6">
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Modern Downtown Apartment</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4 flex items-center">
+          <i class="fas fa-map-marker-alt text-blue-600 dark:text-blue-400 mr-2"></i>
+          Manhattan, New York
+        </p>
+        <div class="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-300 mb-4">
+          <span><i class="fas fa-bed text-blue-600 dark:text-blue-400 mr-2"></i>3 Beds</span>
+          <span><i class="fas fa-bath text-blue-600 dark:text-blue-400 mr-2"></i>2 Baths</span>
+          <span><i class="fas fa-ruler-combined text-blue-600 dark:text-blue-400 mr-2"></i>1,200 sqft</span>
+        </div>
+        <button class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg">
+          View Details
+        </button>
+      </div>
+    </div>
+    
+    <!-- Property Card 2 -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all transform hover:-translate-y-2 group">
+      <div class="relative overflow-hidden h-64">
+        <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=500&h=400&fit=crop" 
+             alt="Luxury Villa" 
+             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+        <div class="absolute top-4 right-4 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full font-bold shadow-lg">
+          $4,800/mo
+        </div>
+        <div class="absolute top-4 left-4 px-3 py-1 bg-green-500 text-white rounded-full text-sm font-semibold">
+          Available
+        </div>
+      </div>
+      <div class="p-6">
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Luxury Family Villa</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4 flex items-center">
+          <i class="fas fa-map-marker-alt text-blue-600 dark:text-blue-400 mr-2"></i>
+          Beverly Hills, Los Angeles
+        </p>
+        <div class="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-300 mb-4">
+          <span><i class="fas fa-bed text-blue-600 dark:text-blue-400 mr-2"></i>5 Beds</span>
+          <span><i class="fas fa-bath text-blue-600 dark:text-blue-400 mr-2"></i>4 Baths</span>
+          <span><i class="fas fa-ruler-combined text-blue-600 dark:text-blue-400 mr-2"></i>3,500 sqft</span>
+        </div>
+        <button class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg">
+          View Details
+        </button>
+      </div>
+    </div>
+    
+    <!-- Property Card 3 -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all transform hover:-translate-y-2 group">
+      <div class="relative overflow-hidden h-64">
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=500&h=400&fit=crop" 
+             alt="Cozy Studio" 
+             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+        <div class="absolute top-4 right-4 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full font-bold shadow-lg">
+          $1,800/mo
+        </div>
+        <div class="absolute top-4 left-4 px-3 py-1 bg-green-500 text-white rounded-full text-sm font-semibold">
+          Available
+        </div>
+      </div>
+      <div class="p-6">
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Cozy Urban Studio</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4 flex items-center">
+          <i class="fas fa-map-marker-alt text-blue-600 dark:text-blue-400 mr-2"></i>
+          Brooklyn, New York
+        </p>
+        <div class="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-300 mb-4">
+          <span><i class="fas fa-bed text-blue-600 dark:text-blue-400 mr-2"></i>1 Bed</span>
+          <span><i class="fas fa-bath text-blue-600 dark:text-blue-400 mr-2"></i>2 Baths</span>
+          <span><i class="fas fa-ruler-combined text-blue-600 dark:text-blue-400 mr-2"></i>650 sqft</span>
+        </div>
+        <button class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg">
+          View Details
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="mb-16">
+  <div class="text-center mb-12">
+    <h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+      How It Works
+    </h2>
+    <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+      Simple steps to find your perfect rental
+    </p>
+  </div>
+  
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div class="text-center">
+      <div class="relative inline-block mb-6">
+        <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto shadow-2xl">
+          <i class="fas fa-search text-white text-4xl"></i>
+        </div>
+        <div class="absolute -top-2 -right-2 w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center font-bold text-gray-900 shadow-lg">
+          1
+        </div>
+      </div>
+      <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Search & Discover</h3>
+      <p class="text-gray-600 dark:text-gray-300">Browse thousands of verified properties that match your preferences and budget</p>
+    </div>
+    
+    <div class="text-center">
+      <div class="relative inline-block mb-6">
+        <div class="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto shadow-2xl">
+          <i class="fas fa-calendar-check text-white text-4xl"></i>
+        </div>
+        <div class="absolute -top-2 -right-2 w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center font-bold text-gray-900 shadow-lg">
+          2
+        </div>
+      </div>
+      <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Schedule Visit</h3>
+      <p class="text-gray-600 dark:text-gray-300">Book appointments to visit properties and meet with owners at your convenience</p>
+    </div>
+    
+    <div class="text-center">
+      <div class="relative inline-block mb-6">
+        <div class="w-24 h-24 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-2xl">
+          <i class="fas fa-key text-white text-4xl"></i>
+        </div>
+        <div class="absolute -top-2 -right-2 w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center font-bold text-gray-900 shadow-lg">
+          3
+        </div>
+      </div>
+      <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Move In</h3>
+      <p class="text-gray-600 dark:text-gray-300">Complete paperwork, finalize agreements, and get ready to move into your new home</p>
+    </div>
+  </div>
+</section>
+
+<!-- User Type Cards (For Non-Authenticated Users) -->
+{% if not user.is_authenticated %}
+<section class="mb-16">
+  <div class="text-center mb-12">
+    <h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+      Join RentalHub Today
+    </h2>
+    <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+      Whether you're looking for a home or listing a property
+    </p>
+  </div>
+  
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+    <!-- Tenant Card -->
+    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-3xl p-8 border-2 border-blue-200 dark:border-blue-700 hover:border-blue-400 dark:hover:border-blue-500 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-2">
+      <div class="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+        <i class="fas fa-users text-white text-3xl"></i>
+      </div>
+      <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">For Tenants</h3>
+      <p class="text-gray-700 dark:text-gray-300 mb-6 text-lg leading-relaxed">
+        Browse verified properties, schedule visits, and connect directly with property owners. Find your perfect home hassle-free.
+      </p>
+      <ul class="space-y-3 mb-8">
+        <li class="flex items-center text-gray-700 dark:text-gray-300">
+          <i class="fas fa-check-circle text-green-500 mr-3"></i>
+          Thousands of verified properties
+        </li>
+        <li class="flex items-center text-gray-700 dark:text-gray-300">
+          <i class="fas fa-check-circle text-green-500 mr-3"></i>
+          Direct owner communication
+        </li>
+        <li class="flex items-center text-gray-700 dark:text-gray-300">
+          <i class="fas fa-check-circle text-green-500 mr-3"></i>
+          Easy booking system
+        </li>
+        <li class="flex items-center text-gray-700 dark:text-gray-300">
+          <i class="fas fa-check-circle text-green-500 mr-3"></i>
+          Secure payment processing
+        </li>
+      </ul>
+      <a href="{% url 'login' %}" class="block w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold text-lg text-center hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl">
+        <i class="fas fa-sign-in-alt mr-2"></i>Login as Tenant
+      </a>
+    </div>
+    
+    <!-- Owner Card -->
+    <div class="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-3xl p-8 border-2 border-purple-200 dark:border-purple-700 hover:border-purple-400 dark:hover:border-purple-500 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-2">
+      <div class="w-20 h-20 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+        <i class="fas fa-home text-white text-3xl"></i>
+      </div>
+      <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">For Owners</h3>
+      <p class="text-gray-700 dark:text-gray-300 mb-6 text-lg leading-relaxed">
+        List your properties, manage bookings, and reach thousands of potential tenants. Maximize your rental income today.
+      </p>
+      <ul class="space-y-3 mb-8">
+        <li class="flex items-center text-gray-700 dark:text-gray-300">
+          <i class="fas fa-check-circle text-green-500 mr-3"></i>
+          Easy property listing
+        </li>
+        <li class="flex items-center text-gray-700 dark:text-gray-300">
+          <i class="fas fa-check-circle text-green-500 mr-3"></i>
+          Advanced analytics dashboard
+        </li>
+        <li class="flex items-center text-gray-700 dark:text-gray-300">
+          <i class="fas fa-check-circle text-green-500 mr-3"></i>
+          Automated tenant screening
+        </li>
+        <li class="flex items-center text-gray-700 dark:text-gray-300">
+          <i class="fas fa-check-circle text-green-500 mr-3"></i>
+          Payment management tools
+        </li>
+      </ul>
+      <a href="{% url 'login' %}" class="block w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold text-lg text-center hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl">
+        <i class="fas fa-sign-in-alt mr-2"></i>Login as Owner
+      </a>
+    </div>
+  </div>
+  
+  <p class="text-center mt-8 text-sm text-gray-500 dark:text-gray-400">
+    <i class="fas fa-info-circle mr-2"></i>
+    Demo accounts available: Use credentials provided by your administrator
+  </p>
+</section>
+{% endif %}
+
+<!-- CTA Section -->
+<section class="relative overflow-hidden rounded-3xl shadow-2xl mb-8">
+  <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-700"></div>
+  <div class="relative z-10 px-8 py-16 text-center text-white">
+    <h2 class="text-4xl md:text-5xl font-bold mb-6">Ready to Get Started?</h2>
+    <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+      Join thousands of happy users and find your perfect rental property today
+    </p>
+    {% if not user.is_authenticated %}
+      <a href="{% url 'login' %}" class="inline-block px-10 py-4 bg-white text-blue-600 rounded-xl font-bold text-lg shadow-2xl hover:bg-blue-50 transform hover:-translate-y-1 transition-all">
+        <i class="fas fa-rocket mr-2"></i>Get Started Now
+      </a>
+    {% endif %}
+  </div>
+</section>
+
 {% endblock %}

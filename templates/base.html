@@ -1,47 +1,165 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Modern Property Rental Management System" />
 
-    <title>{% block title %}RentalHub{% endblock %}</title>
+    <title>{% block title %}RentalHub - Modern Property Management{% endblock %}</title>
 
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 text-gray-900">
 
-    <!-- Top Navbar -->
-    <nav class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="{% url 'home' %}" class="flex items-center gap-2">
-                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white text-lg font-bold">
-                    R
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50
+             dark:from-gray-900 dark:via-slate-900 dark:to-gray-900
+             min-h-screen transition-colors duration-300">
+
+<!-- NAVBAR -->
+<nav id="navbar"
+     class="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80
+            backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="flex items-center justify-between h-16">
+
+            <!-- Logo -->
+            <a href="{% url 'home' %}" class="flex items-center gap-3">
+                <span class="w-10 h-10 flex items-center justify-center
+                             bg-gradient-to-br from-blue-600 to-indigo-700
+                             text-white rounded-xl shadow">
+                    <i class="fas fa-home"></i>
                 </span>
-                <span class="font-semibold text-lg">RentalHub</span>
+                <div>
+                    <div class="font-bold text-xl text-gray-900 dark:text-white">
+                        RentalHub
+                    </div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                        Property Management
+                    </div>
+                </div>
             </a>
 
-            <div class="flex items-center gap-4 text-sm">
+            <!-- Right side -->
+            <div class="flex items-center gap-4">
+
+                <!-- Dark mode toggle -->
+                <button id="darkModeToggle"
+                        class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800
+                               text-gray-600 dark:text-gray-300
+                               hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <i class="fas fa-moon dark:hidden"></i>
+                    <i class="fas fa-sun hidden dark:inline"></i>
+                </button>
+
                 {% if user.is_authenticated %}
-                    <span class="hidden sm:inline text-gray-600">
-                        {{ user.username }} ({{ user.role }})
-                    </span>
-                    <a href="{% url 'logout' %}" class="text-red-600 hover:text-red-700">
-                        Logout
-                    </a>
+                    <!-- User info -->
+                    <div class="hidden sm:flex items-center gap-2 px-3 py-1
+                                rounded-full bg-blue-50 dark:bg-blue-900/30">
+                        <div class="w-8 h-8 rounded-full bg-blue-600 text-white
+                                    flex items-center justify-center text-sm font-bold">
+                            {{ user.username|slice:":1"|upper }}
+                        </div>
+                        <div class="text-sm">
+                            <div class="font-semibold text-gray-800 dark:text-gray-200">
+                                {{ user.username }}
+                            </div>
+                            <div class="text-xs text-blue-600 dark:text-blue-400 capitalize">
+                                {{ user.role }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ✅ FIXED LOGOUT -->
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
+                                   bg-red-50 dark:bg-red-900/30
+                                   text-red-600 dark:text-red-400
+                                   hover:bg-red-100 dark:hover:bg-red-900/50
+                                   font-medium text-sm transition-all">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span class="hidden md:inline">Logout</span>
+                        </button>
+                    </form>
+
                 {% else %}
-                    <a href="{% url 'login' %}" class="text-blue-600 hover:text-blue-700">
+                    <!-- Login -->
+                    <a href="{% url 'login' %}"
+                       class="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg
+                              bg-gradient-to-r from-blue-600 to-indigo-600
+                              text-white hover:from-blue-700 hover:to-indigo-700
+                              font-medium text-sm shadow">
+                        <i class="fas fa-sign-in-alt"></i>
                         Login
                     </a>
                 {% endif %}
+
             </div>
         </div>
-    </nav>
+    </div>
+</nav>
 
-    <!-- Page Content -->
-    <main class="max-w-7xl mx-auto px-4 py-6">
-        {% block content %}{% endblock %}
-    </main>
+<!-- MAIN CONTENT -->
+<main class="flex-1 max-w-7xl mx-auto px-6 py-8">
+    {% block content %}{% endblock %}
+</main>
 
+<!-- FOOTER -->
+<footer class="bg-white/80 dark:bg-gray-900/80 border-t
+               border-gray-200/50 dark:border-gray-700/50">
+    <div class="max-w-7xl mx-auto px-6 py-6 text-center text-sm
+                text-gray-500 dark:text-gray-400">
+        © 2025 RentalHub. Built with ❤️ by Your Team
+    </div>
+</footer>
+
+<!-- DARK MODE SCRIPT -->
+<script>
+    const toggle = document.getElementById('darkModeToggle');
+    const html = document.documentElement;
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        html.classList.add('dark');
+    }
+
+    toggle.addEventListener('click', () => {
+        html.classList.toggle('dark');
+        localStorage.setItem(
+            'theme',
+            html.classList.contains('dark') ? 'dark' : 'light'
+        );
+    });
+</script>
+
+{% block extra_scripts %}{% endblock %}
 </body>
 </html>

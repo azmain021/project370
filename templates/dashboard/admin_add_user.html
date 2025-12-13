@@ -2,42 +2,42 @@
 {% block title %}Add User{% endblock %}
 
 {% block content %}
-<div class="max-w-lg mx-auto bg-white shadow rounded-lg p-6 mt-8">
-    <h2 class="text-xl font-semibold mb-4">Add New User</h2>
+<div class="max-w-lg mx-auto bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mt-8 border border-gray-200 dark:border-gray-700">
+    <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Add New User</h2>
 
     <form method="POST">
         {% csrf_token %}
 
-        <label class="block mb-2">Username</label>
+        <label class="block mb-2 text-gray-900 dark:text-gray-100 font-medium">Username</label>
         <input type="text" name="username" required
-               class="w-full border rounded px-3 py-2 mb-4">
+               class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 mb-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
 
-        <label class="block mb-2">Email</label>
+        <label class="block mb-2 text-gray-900 dark:text-gray-100 font-medium">Email</label>
         <input type="email" name="email" required
-               class="w-full border rounded px-3 py-2 mb-4">
+               class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 mb-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
 
-        <label class="block mb-2">Phone Number</label>
+        <label class="block mb-2 text-gray-900 dark:text-gray-100 font-medium">Phone Number</label>
         <input type="text" name="phone" required
-               class="w-full border rounded px-3 py-2 mb-4">
+               class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 mb-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
 
-        <label class="block mb-2">Role</label>
-        <select name="role" class="w-full border rounded px-3 py-2 mb-4">
+        <label class="block mb-2 text-gray-900 dark:text-gray-100 font-medium">Role</label>
+        <select name="role" class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 mb-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="SELLER">Seller</option>
             <option value="TENANT">Tenant</option>
         </select>
 
-        <label class="block mb-2">Password</label>
+        <label class="block mb-2 text-gray-900 dark:text-gray-100 font-medium">Password</label>
         <input type="password" name="password" required
-               class="w-full border rounded px-3 py-2 mb-4">
+               class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 mb-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
 
         <button type="submit"
-            class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+            class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors font-semibold shadow-md">
             Create User
         </button>
     </form>
 
     <div class="mt-4 text-center">
-        <a href="{% url 'admin-users' %}" class="text-blue-600 hover:underline">
+        <a href="{% url 'admin-users' %}" class="text-blue-600 dark:text-blue-400 hover:underline">
             ← Back to Users
         </a>
     </div>
