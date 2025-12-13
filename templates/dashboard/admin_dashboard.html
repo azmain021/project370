@@ -2,10 +2,10 @@
 {% block title %}Admin Dashboard | RentalHub{% endblock %}
 
 {% block content %}
-<div class="flex flex-col gap-6">
+<div class="flex flex-col gap-8">
 
   <!-- Header + quick links -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
     <div>
       <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
       <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -67,6 +67,12 @@
       <p class="text-xs text-gray-500 dark:text-gray-400">
         Payments awaiting admin approval.
       </p>
+      <a href="{% url 'admin-payments' %}" class="inline-flex items-center gap-2 text-orange-600 font-semibold hover:gap-3 transition-all">
+        Review Payments
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </a>
     </div>
 
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border border-gray-200 dark:border-gray-700">
@@ -78,6 +84,12 @@
       <p class="text-xs text-gray-500 dark:text-gray-400">
         Visit requests from tenants that are still pending.
       </p>
+      <button disabled class="inline-flex items-center gap-2 text-gray-400 font-semibold cursor-not-allowed">
+        Coming Soon
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </button>
     </div>
   </div>
 
