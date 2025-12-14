@@ -2,14 +2,10 @@
 __pycache__/
 *.pyc
 
-# Virtual environment
+# Virtual environments
 .venv/
 env/
 venv/
-*.lock
-
-# Pipenv
-Pipfile.lock
 
 # Django
 db.sqlite3

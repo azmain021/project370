@@ -87,7 +87,7 @@ class VisitRequest(models.Model):
         limit_choices_to={'role': 'TENANT'},
     )
 
-    # agent assigned by admin on approval
+    # agent assigned only after approval (still not working)
     agent = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
