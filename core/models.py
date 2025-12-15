@@ -28,16 +28,22 @@ class User(AbstractUser):
 
 class Property(models.Model):
 
+    STATUS_CHOICES = (
+        ("AVAILABLE", "Available"),
+        ("BOOKED", "Booked"),
+        ("INACTIVE", "Inactive"),
+    )
+
     PROPERTY_TYPES = (
-        ('SELL', 'For Sale'),
-        ('RENT', 'For Rent'),
+        ("SELL", "For Sale"),
+        ("RENT", "For Rent"),
     )
 
     seller = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='properties',
-        limit_choices_to={'role': 'SELLER'},
+        related_name="properties",
+        limit_choices_to={"role": "SELLER"},
     )
 
     title = models.CharField(max_length=100)
@@ -49,12 +55,21 @@ class Property(models.Model):
         choices=PROPERTY_TYPES
     )
 
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="AVAILABLE"
+    )
 
     description = models.TextField(blank=True)
 
     image = models.ImageField(
-        upload_to='property_images/',
+        upload_to="property_images/",
         blank=True,
         null=True
     )
@@ -62,7 +77,7 @@ class Property(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.title} ({self.property_type})"
+        return f"{self.title} ({self.status})"
 
 
 

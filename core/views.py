@@ -86,28 +86,28 @@ def admin_users(request):
     if request.user.role != "ADMIN":
         return redirect("home")
 
-    # Fetch sellers and tenants
     sellers = User.objects.filter(role="SELLER")
     tenants = User.objects.filter(role="TENANT")
+    agents  = User.objects.filter(role="AGENT")
 
-    # Admin wants to delete a user
     if request.method == "POST":
         user_id = request.POST.get("user_id")
         try:
             u = User.objects.get(id=user_id)
             u.delete()
-        except:
+        except User.DoesNotExist:
             pass
-
         return redirect("admin-users")
 
     context = {
         "sellers": sellers,
         "tenants": tenants,
+        "agents": agents,
     }
 
     return render(request, "dashboard/admin_users.html", context)
 
+@login_required
 def admin_add_user(request):
     if request.user.role != "ADMIN":
         return redirect("home")
@@ -115,14 +115,14 @@ def admin_add_user(request):
     if request.method == "POST":
         username = request.POST.get("username")
         email = request.POST.get("email")
-        phone = request.POST.get("phone")
+        phone_number = request.POST.get("phone")
         role = request.POST.get("role")
         password = request.POST.get("password")
 
         User.objects.create_user(
             username=username,
             email=email,
-            phone=phone,
+            phone_number=phone_number,
             role=role,
             password=password
         )
@@ -168,8 +168,8 @@ def admin_add_property(request):
         address = request.POST.get("address")
         city = request.POST.get("city")
         property_type = request.POST.get("property_type")
-        rent_amount = request.POST.get("rent_amount")
-        status = request.POST.get("status")
+        price = request.POST.get("price")
+
         description = request.POST.get("description")
 
         seller = User.objects.get(id=seller_id)
@@ -180,8 +180,7 @@ def admin_add_property(request):
             address=address,
             city=city,
             property_type=property_type,
-            rent_amount=rent_amount,
-            status=status,
+            price=price,
             description=description,
         )
 
