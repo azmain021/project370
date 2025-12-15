@@ -172,8 +172,7 @@ class Payment(models.Model):
         default=0
     )
 
-    seller_amount = models.DecimalField(
-        max_digits=10,
+    seller_amount = models.DecimalField( max_digits=10,
         decimal_places=2,
         default=0
     )
@@ -203,3 +202,128 @@ class Payment(models.Model):
     def __str__(self):
         return f"Payment {self.id} ({self.status})"
 
+
+
+"""
+CREATE TABLE user (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    
+    username VARCHAR(150) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,     # hashed password stored by Django auth
+    email VARCHAR(254),
+
+    role ENUM('ADMIN', 'SELLER', 'TENANT', 'AGENT') NOT NULL,
+
+    phone_number VARCHAR(15),
+    address TEXT,
+
+    is_staff BOOLEAN DEFAULT FALSE,      # required for admin access
+    is_superuser BOOLEAN DEFAULT FALSE,  # required for super admin
+    last_login DATETIME,
+    date_joined DATETIME,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE property (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+
+    seller_id INT NOT NULL,              # FK → user(id)
+
+    title VARCHAR(100) NOT NULL,
+    address TEXT NOT NULL,
+    city VARCHAR(50) NOT NULL,
+
+    property_type ENUM('SELL', 'RENT') NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+
+    description TEXT,
+    image VARCHAR(255),                  # image file path
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (seller_id)
+        REFERENCES user(id)
+        ON DELETE CASCADE
+);
+
+
+CREATE TABLE visit_request (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+
+    property_id INT NOT NULL,             # FK → property(id)
+    tenant_id INT NOT NULL,               # FK → user(id)
+    agent_id INT,                         # FK → user(id), nullable
+
+    preferred_date DATE NOT NULL,
+
+    status ENUM('PENDING', 'APPROVED', 'REJECTED')
+           DEFAULT 'PENDING',
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (property_id)
+        REFERENCES property(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (tenant_id)
+        REFERENCES user(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (agent_id)
+        REFERENCES user(id)
+        ON DELETE SET NULL
+);
+
+CREATE TABLE booking (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+
+    property_id INT NOT NULL,             # FK → property(id)
+    tenant_id INT NOT NULL,               # FK → user(id)
+
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+
+    status ENUM('PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED')
+           DEFAULT 'PENDING',
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (property_id)
+        REFERENCES property(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (tenant_id)
+        REFERENCES user(id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE payment (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+
+    booking_id INT NOT NULL,              # FK → booking(id)
+
+    amount DECIMAL(10,2) NOT NULL,
+    platform_cut DECIMAL(10,2) DEFAULT 0,
+    seller_amount DECIMAL(10,2) DEFAULT 0,
+
+    status ENUM('PENDING', 'APPROVED', 'REJECTED')
+           DEFAULT 'PENDING',
+
+    approved_by_admin INT,                # FK → user(id)
+    approved_at DATETIME,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (booking_id)
+        REFERENCES booking(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (approved_by_admin)
+        REFERENCES user(id)
+        ON DELETE SET NULL
+);
+
+
+"""
