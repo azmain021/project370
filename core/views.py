@@ -11,21 +11,10 @@ from .models import User, Property, Booking, Payment, VisitRequest
 # =========================
 
 def home(request):
-    # Get featured properties first
-    featured = list(Property.objects.filter(is_featured=True, status="AVAILABLE")[:6])
+    # Get all featured properties (no limit - admin can feature as many as they want)
+    featured_properties = list(Property.objects.filter(is_featured=True, status="AVAILABLE"))
     
-    # If less than 6 featured, fill with random available properties
-    if len(featured) < 6:
-        exclude_ids = [p.id for p in featured]
-        remaining = 6 - len(featured)
-        random_properties = list(
-            Property.objects.filter(status="AVAILABLE")
-            .exclude(id__in=exclude_ids)
-            .order_by("?")[:remaining]
-        )
-        featured.extend(random_properties)
-    
-    return render(request, "home.html", {"featured_properties": featured})
+    return render(request, "home.html", {"featured_properties": featured_properties})
 
 
 # =========================
@@ -422,6 +411,29 @@ def tenant_my_visits(request):
         "property", "agent"
     ).order_by("-created_at")
 
+    # Get property IDs that tenant has already booked (PENDING or CONFIRMED)
+    booked_property_ids = set(
+        Booking.objects.filter(
+            tenant=request.user,
+            status__in=["PENDING", "CONFIRMED"]
+        ).values_list("property_id", flat=True)
+    )
+
+    # Get property IDs that are already confirmed by anyone
+    confirmed_property_ids = set(
+        Booking.objects.filter(status="CONFIRMED").values_list("property_id", flat=True)
+    )
+
+    # Add a flag to each visit indicating if booking is allowed
+    for visit in visits:
+        visit.can_book = (
+            visit.status == "APPROVED" and
+            visit.property_id not in booked_property_ids and
+            visit.property_id not in confirmed_property_ids
+        )
+        visit.already_booked = visit.property_id in booked_property_ids
+        visit.property_confirmed = visit.property_id in confirmed_property_ids
+
     context = {
         "visits": visits,
     }
@@ -508,14 +520,20 @@ def book_property(request, property_id):
         except Property.DoesNotExist:
             return redirect("tenant-my-visits")
 
-        # Check if tenant already has a pending booking for this property
+        # Check if tenant already has an active booking (PENDING or CONFIRMED) for this property
         existing = Booking.objects.filter(
             property=prop,
             tenant=request.user,
-            status="PENDING"
+            status__in=["PENDING", "CONFIRMED"]
         ).exists()
 
-        if not existing:
+        # Also check if property is already booked by someone else
+        property_booked = Booking.objects.filter(
+            property=prop,
+            status="CONFIRMED"
+        ).exists()
+
+        if not existing and not property_booked:
             Booking.objects.create(
                 property=prop,
                 tenant=request.user,

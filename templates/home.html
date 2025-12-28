@@ -119,65 +119,98 @@
   </div>
   
   {% if featured_properties %}
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-    {% for property in featured_properties %}
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all transform hover:-translate-y-2 group">
-      <div class="relative overflow-hidden h-64">
-        {% if property.image %}
-          <img src="{{ property.image.url }}" 
-               alt="{{ property.title }}" 
-               class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-        {% else %}
-          <div class="w-full h-full bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center">
-            <i class="fas fa-home text-6xl text-blue-300 dark:text-blue-600"></i>
+  <!-- Carousel Container -->
+  <div class="relative">
+    <!-- Navigation Arrows (only show if more than 3) -->
+    {% if featured_properties|length > 3 %}
+    <button id="prevBtn" onclick="slideCarousel(-1)" 
+            class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-12 h-12 
+                   bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700
+                   flex items-center justify-center text-gray-600 dark:text-gray-300
+                   hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all
+                   disabled:opacity-50 disabled:cursor-not-allowed">
+      <i class="fas fa-chevron-left text-lg"></i>
+    </button>
+    <button id="nextBtn" onclick="slideCarousel(1)" 
+            class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-12 h-12 
+                   bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700
+                   flex items-center justify-center text-gray-600 dark:text-gray-300
+                   hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all
+                   disabled:opacity-50 disabled:cursor-not-allowed">
+      <i class="fas fa-chevron-right text-lg"></i>
+    </button>
+    {% endif %}
+    
+    <!-- Cards Container -->
+    <div class="overflow-hidden">
+      <div id="carouselTrack" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 transition-transform duration-500 ease-in-out">
+        {% for property in featured_properties %}
+        <div class="property-card">
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all transform hover:-translate-y-2 group h-full">
+            <div class="relative overflow-hidden h-64">
+              {% if property.image %}
+                <img src="{{ property.image.url }}" 
+                     alt="{{ property.title }}" 
+                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+              {% else %}
+                <div class="w-full h-full bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center">
+                  <i class="fas fa-home text-6xl text-blue-300 dark:text-blue-600"></i>
+                </div>
+              {% endif %}
+              <div class="absolute top-4 right-4 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full font-bold shadow-lg">
+                ৳ {{ property.price }}
+              </div>
+              <div class="absolute top-4 left-4 flex items-center gap-2">
+                <span class="px-3 py-1 bg-green-500 text-white rounded-full text-sm font-semibold">
+                  {{ property.get_status_display }}
+                </span>
+                <span class="px-3 py-1 bg-yellow-500 text-white rounded-full text-sm font-semibold">
+                  <i class="fas fa-star mr-1"></i>Featured
+                </span>
+              </div>
+            </div>
+            <div class="p-6">
+              <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ property.title }}</h3>
+              <p class="text-gray-600 dark:text-gray-300 mb-4 flex items-center">
+                <i class="fas fa-map-marker-alt text-blue-600 dark:text-blue-400 mr-2"></i>
+                {{ property.city }}
+              </p>
+              <div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300 mb-4">
+                <span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full">
+                  <i class="fas fa-tag text-blue-600 dark:text-blue-400 mr-1"></i>
+                  {{ property.get_property_type_display }}
+                </span>
+              </div>
+              {% if user.is_authenticated %}
+                <a href="{% url 'tenant-dashboard' %}" class="block w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-center rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg">
+                  View Details
+                </a>
+              {% else %}
+                <a href="{% url 'login' %}" class="block w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-center rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg">
+                  Login to View
+                </a>
+              {% endif %}
+            </div>
           </div>
-        {% endif %}
-        <div class="absolute top-4 right-4 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full font-bold shadow-lg">
-          ৳ {{ property.price }}
         </div>
-        <div class="absolute top-4 left-4 flex items-center gap-2">
-          <span class="px-3 py-1 bg-green-500 text-white rounded-full text-sm font-semibold">
-            {{ property.get_status_display }}
-          </span>
-          {% if property.is_featured %}
-          <span class="px-3 py-1 bg-yellow-500 text-white rounded-full text-sm font-semibold">
-            <i class="fas fa-star mr-1"></i>Featured
-          </span>
-          {% endif %}
-        </div>
-      </div>
-      <div class="p-6">
-        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ property.title }}</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4 flex items-center">
-          <i class="fas fa-map-marker-alt text-blue-600 dark:text-blue-400 mr-2"></i>
-          {{ property.city }}
-        </p>
-        <div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300 mb-4">
-          <span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full">
-            <i class="fas fa-tag text-blue-600 dark:text-blue-400 mr-1"></i>
-            {{ property.get_property_type_display }}
-          </span>
-        </div>
-        {% if user.is_authenticated %}
-          <a href="{% url 'tenant-dashboard' %}" class="block w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-center rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg">
-            View Details
-          </a>
-        {% else %}
-          <a href="{% url 'login' %}" class="block w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-center rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg">
-            Login to View
-          </a>
-        {% endif %}
+        {% endfor %}
       </div>
     </div>
-    {% endfor %}
+    
+    <!-- Dots Indicator -->
+    {% if featured_properties|length > 3 %}
+    <div id="dotsContainer" class="flex justify-center gap-2 mt-8">
+      <!-- Dots will be generated by JS -->
+    </div>
+    {% endif %}
   </div>
   {% else %}
   <div class="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
     <div class="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
       <i class="fas fa-home text-4xl text-gray-400"></i>
     </div>
-    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">No Properties Available</h3>
-    <p class="text-gray-600 dark:text-gray-400">Check back soon for new listings!</p>
+    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">No Featured Properties</h3>
+    <p class="text-gray-600 dark:text-gray-400">Check back soon for featured listings!</p>
   </div>
   {% endif %}
 </section>
@@ -336,4 +369,114 @@
   </div>
 </section>
 
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Carousel/Pagination functionality
+  const track = document.getElementById('carouselTrack');
+  const dotsContainer = document.getElementById('dotsContainer');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  
+  if (track) {
+    const cards = Array.from(track.querySelectorAll('.property-card'));
+    const totalCards = cards.length;
+    let currentPage = 0;
+    
+    // Determine cards per page based on screen size
+    function getCardsPerPage() {
+      if (window.innerWidth >= 1024) return 3; // lg
+      if (window.innerWidth >= 768) return 2;  // md
+      return 1; // sm
+    }
+    
+    let cardsPerPage = getCardsPerPage();
+    let totalPages = Math.ceil(totalCards / cardsPerPage);
+    
+    // Show/hide cards based on current page
+    function showPage(page) {
+      const start = page * cardsPerPage;
+      const end = start + cardsPerPage;
+      
+      cards.forEach((card, index) => {
+        if (index >= start && index < end) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+    
+    // Create dots
+    function createDots() {
+      if (!dotsContainer || totalPages <= 1) return;
+      dotsContainer.innerHTML = '';
+      for (let i = 0; i < totalPages; i++) {
+        const dot = document.createElement('button');
+        dot.className = `w-3 h-3 rounded-full transition-all ${i === 0 ? 'bg-blue-600 w-8' : 'bg-gray-300 dark:bg-gray-600'}`;
+        dot.onclick = () => goToPage(i);
+        dotsContainer.appendChild(dot);
+      }
+    }
+    
+    // Update dots
+    function updateDots() {
+      if (!dotsContainer) return;
+      const dots = dotsContainer.children;
+      for (let i = 0; i < dots.length; i++) {
+        if (i === currentPage) {
+          dots[i].className = 'w-8 h-3 rounded-full transition-all bg-blue-600';
+        } else {
+          dots[i].className = 'w-3 h-3 rounded-full transition-all bg-gray-300 dark:bg-gray-600 hover:bg-gray-400';
+        }
+      }
+    }
+    
+    // Update buttons
+    function updateButtons() {
+      if (prevBtn) {
+        prevBtn.disabled = currentPage === 0;
+        prevBtn.style.opacity = currentPage === 0 ? '0.5' : '1';
+      }
+      if (nextBtn) {
+        nextBtn.disabled = currentPage >= totalPages - 1;
+        nextBtn.style.opacity = currentPage >= totalPages - 1 ? '0.5' : '1';
+      }
+    }
+    
+    // Go to page
+    function goToPage(pageIndex) {
+      currentPage = pageIndex;
+      showPage(currentPage);
+      updateDots();
+      updateButtons();
+    }
+    
+    // Slide carousel
+    window.slideCarousel = function(direction) {
+      const newPage = currentPage + direction;
+      if (newPage >= 0 && newPage < totalPages) {
+        goToPage(newPage);
+      }
+    };
+    
+    // Initialize
+    showPage(0);
+    createDots();
+    updateButtons();
+    
+    // Handle resize
+    window.addEventListener('resize', () => {
+      const newCardsPerPage = getCardsPerPage();
+      if (newCardsPerPage !== cardsPerPage) {
+        cardsPerPage = newCardsPerPage;
+        totalPages = Math.ceil(totalCards / cardsPerPage);
+        currentPage = Math.min(currentPage, totalPages - 1);
+        createDots();
+        goToPage(currentPage);
+      }
+    });
+  }
+</script>
 {% endblock %}

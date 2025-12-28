@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db.models.signals import pre_delete, post_delete
+from django.dispatch import receiver
 
 class User(AbstractUser):
     ROLE_CHOICES = (
@@ -215,6 +217,30 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment {self.id} ({self.status})"
+
+
+# ============================================================================
+# SIGNALS - Auto-update property status when bookings are deleted
+# ============================================================================
+
+@receiver(pre_delete, sender=Booking)
+def reset_property_on_booking_delete(sender, instance, **kwargs):
+    """
+    When a booking is deleted (e.g., user deletion), check if property 
+    should be set back to AVAILABLE.
+    """
+    # Only reset if this was a CONFIRMED or PENDING booking
+    if instance.status in ['CONFIRMED', 'PENDING']:
+        # Check if there are other active bookings for this property
+        other_bookings = Booking.objects.filter(
+            property=instance.property,
+            status__in=['CONFIRMED', 'PENDING']
+        ).exclude(id=instance.id).exists()
+        
+        # If no other active bookings, set property back to available
+        if not other_bookings:
+            instance.property.status = 'AVAILABLE'
+            instance.property.save()
 
 
 # ============================================================================
