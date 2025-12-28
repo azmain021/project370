@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block title %}Manage Bookings | Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <i class="fas fa-shopping-bag text-green-600 mr-3"></i>Booking Requests
+      </h1>
+      <p class="text-gray-600 dark:text-gray-400">
+        Manage property booking requests from tenants
+      </p>
+    </div>
+    <a href="{% url 'admin-dashboard' %}" 
+       class="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 
+              rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+      <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+    </a>
+  </div>
+
+  <!-- Pending Bookings -->
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-8">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center">
+        <i class="fas fa-clock text-yellow-600 dark:text-yellow-400"></i>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Pending Bookings</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400">{{ pending_bookings|length }} booking(s) waiting for confirmation</p>
+      </div>
+    </div>
+
+    {% if pending_bookings %}
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="text-left text-sm text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+              <th class="pb-3 font-semibold">Property</th>
+              <th class="pb-3 font-semibold">Tenant</th>
+              <th class="pb-3 font-semibold">Price</th>
+              <th class="pb-3 font-semibold">Requested On</th>
+              <th class="pb-3 font-semibold text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+            {% for booking in pending_bookings %}
+              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <td class="py-4">
+                  <div class="font-medium text-gray-900 dark:text-white">{{ booking.property.title }}</div>
+                  <div class="text-sm text-gray-500 dark:text-gray-400">{{ booking.property.city }}</div>
+                </td>
+                <td class="py-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 
+                                flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-sm">
+                      {{ booking.tenant.username|slice:":1"|upper }}
+                    </div>
+                    <div>
+                      <div class="font-medium text-gray-900 dark:text-white">{{ booking.tenant.username }}</div>
+                      <div class="text-sm text-gray-500 dark:text-gray-400">{{ booking.tenant.email }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-4">
+                  <span class="font-bold text-green-600 dark:text-green-400">
+                    ৳ {{ booking.property.price }}
+                  </span>
+                </td>
+                <td class="py-4 text-gray-600 dark:text-gray-400">
+                  {{ booking.created_at|date:"M d, Y" }}
+                </td>
+                <td class="py-4 text-right">
+                  <form method="POST" class="flex items-center justify-end gap-2">
+                    {% csrf_token %}
+                    <input type="hidden" name="booking_id" value="{{ booking.id }}">
+                    <button type="submit" name="action" value="confirm"
+                            class="px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 
+                                   rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-all text-sm font-medium">
+                      <i class="fas fa-check mr-1"></i>Confirm
+                    </button>
+                    <button type="submit" name="action" value="cancel"
+                            class="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 
+                                   rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-all text-sm font-medium">
+                      <i class="fas fa-times mr-1"></i>Cancel
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center py-12">
+        <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-inbox text-2xl text-gray-400"></i>
+        </div>
+        <p class="text-gray-500 dark:text-gray-400">No pending booking requests</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Confirmed Bookings -->
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-8">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+        <i class="fas fa-check-circle text-green-600 dark:text-green-400"></i>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Confirmed Bookings</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Last 10 confirmed bookings</p>
+      </div>
+    </div>
+
+    {% if confirmed_bookings %}
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="text-left text-sm text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+              <th class="pb-3 font-semibold">Property</th>
+              <th class="pb-3 font-semibold">Tenant</th>
+              <th class="pb-3 font-semibold">Price</th>
+              <th class="pb-3 font-semibold">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+            {% for booking in confirmed_bookings %}
+              <tr>
+                <td class="py-4">
+                  <div class="font-medium text-gray-900 dark:text-white">{{ booking.property.title }}</div>
+                </td>
+                <td class="py-4 text-gray-600 dark:text-gray-400">{{ booking.tenant.username }}</td>
+                <td class="py-4">
+                  <span class="font-bold text-green-600 dark:text-green-400">৳ {{ booking.property.price }}</span>
+                </td>
+                <td class="py-4">
+                  <span class="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 
+                               rounded-full text-sm font-medium">
+                    <i class="fas fa-check-circle mr-1"></i>Confirmed
+                  </span>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center py-8">
+        <p class="text-gray-500 dark:text-gray-400">No confirmed bookings yet</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Cancelled Bookings -->
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center">
+        <i class="fas fa-times-circle text-red-600 dark:text-red-400"></i>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Cancelled Bookings</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Last 10 cancelled bookings</p>
+      </div>
+    </div>
+
+    {% if cancelled_bookings %}
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="text-left text-sm text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+              <th class="pb-3 font-semibold">Property</th>
+              <th class="pb-3 font-semibold">Tenant</th>
+              <th class="pb-3 font-semibold">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+            {% for booking in cancelled_bookings %}
+              <tr>
+                <td class="py-4">
+                  <div class="font-medium text-gray-900 dark:text-white">{{ booking.property.title }}</div>
+                </td>
+                <td class="py-4 text-gray-600 dark:text-gray-400">{{ booking.tenant.username }}</td>
+                <td class="py-4">
+                  <span class="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 
+                               rounded-full text-sm font-medium">
+                    <i class="fas fa-times-circle mr-1"></i>Cancelled
+                  </span>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center py-8">
+        <p class="text-gray-500 dark:text-gray-400">No cancelled bookings</p>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

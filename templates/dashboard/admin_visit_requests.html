@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% block title %}Visit Requests | Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <i class="fas fa-calendar-alt text-blue-600 mr-3"></i>Visit Requests
+      </h1>
+      <p class="text-gray-600 dark:text-gray-400">
+        Manage property visit requests from tenants
+      </p>
+    </div>
+    <a href="{% url 'admin-dashboard' %}" 
+       class="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 
+              rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+      <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+    </a>
+  </div>
+
+  <!-- Pending Requests -->
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-8">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center">
+        <i class="fas fa-clock text-yellow-600 dark:text-yellow-400"></i>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Pending Requests</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400">{{ pending_visits|length }} request(s) waiting for approval</p>
+      </div>
+    </div>
+
+    {% if pending_visits %}
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="text-left text-sm text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+              <th class="pb-3 font-semibold">Property</th>
+              <th class="pb-3 font-semibold">Tenant</th>
+              <th class="pb-3 font-semibold">Preferred Date</th>
+              <th class="pb-3 font-semibold">Requested On</th>
+              <th class="pb-3 font-semibold">Assign Agent</th>
+              <th class="pb-3 font-semibold text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+            {% for visit in pending_visits %}
+              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <td class="py-4">
+                  <div class="font-medium text-gray-900 dark:text-white">{{ visit.property.title }}</div>
+                  <div class="text-sm text-gray-500 dark:text-gray-400">{{ visit.property.city }}</div>
+                </td>
+                <td class="py-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 
+                                flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-sm">
+                      {{ visit.tenant.username|slice:":1"|upper }}
+                    </div>
+                    <div>
+                      <div class="font-medium text-gray-900 dark:text-white">{{ visit.tenant.username }}</div>
+                      <div class="text-sm text-gray-500 dark:text-gray-400">{{ visit.tenant.email }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-4">
+                  <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 
+                               rounded-full text-sm font-medium">
+                    {{ visit.preferred_date }}
+                  </span>
+                </td>
+                <td class="py-4 text-gray-600 dark:text-gray-400">
+                  {{ visit.created_at|date:"M d, Y" }}
+                </td>
+                <td class="py-4">
+                  <form method="POST" class="flex items-center gap-2" id="form-{{ visit.id }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="visit_id" value="{{ visit.id }}">
+                    <select name="agent_id" 
+                            class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 
+                                   bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-sm
+                                   focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                      <option value="">-- Select Agent --</option>
+                      {% for agent in agents %}
+                        <option value="{{ agent.id }}">{{ agent.username }}</option>
+                      {% endfor %}
+                    </select>
+                </td>
+                <td class="py-4 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <button type="submit" name="action" value="approve"
+                              class="px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 
+                                     rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-all text-sm font-medium">
+                        <i class="fas fa-check mr-1"></i>Approve
+                      </button>
+                      <button type="submit" name="action" value="reject"
+                              class="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 
+                                     rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-all text-sm font-medium">
+                        <i class="fas fa-times mr-1"></i>Reject
+                      </button>
+                    </div>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center py-12">
+        <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-inbox text-2xl text-gray-400"></i>
+        </div>
+        <p class="text-gray-500 dark:text-gray-400">No pending visit requests</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Approved Requests -->
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-8">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+        <i class="fas fa-check-circle text-green-600 dark:text-green-400"></i>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Recently Approved</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Last 10 approved requests</p>
+      </div>
+    </div>
+
+    {% if approved_visits %}
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="text-left text-sm text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+              <th class="pb-3 font-semibold">Property</th>
+              <th class="pb-3 font-semibold">Tenant</th>
+              <th class="pb-3 font-semibold">Visit Date</th>
+              <th class="pb-3 font-semibold">Assigned Agent</th>
+              <th class="pb-3 font-semibold">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+            {% for visit in approved_visits %}
+              <tr>
+                <td class="py-4">
+                  <div class="font-medium text-gray-900 dark:text-white">{{ visit.property.title }}</div>
+                </td>
+                <td class="py-4 text-gray-600 dark:text-gray-400">{{ visit.tenant.username }}</td>
+                <td class="py-4 text-gray-600 dark:text-gray-400">{{ visit.preferred_date }}</td>
+                <td class="py-4">
+                  {% if visit.agent %}
+                    <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 
+                                 rounded-full text-sm font-medium">
+                      {{ visit.agent.username }}
+                    </span>
+                  {% else %}
+                    <span class="text-gray-400">Not assigned</span>
+                  {% endif %}
+                </td>
+                <td class="py-4">
+                  <span class="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 
+                               rounded-full text-sm font-medium">
+                    <i class="fas fa-check-circle mr-1"></i>Approved
+                  </span>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center py-8">
+        <p class="text-gray-500 dark:text-gray-400">No approved requests yet</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Rejected Requests -->
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center">
+        <i class="fas fa-times-circle text-red-600 dark:text-red-400"></i>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Recently Rejected</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Last 10 rejected requests</p>
+      </div>
+    </div>
+
+    {% if rejected_visits %}
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="text-left text-sm text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+              <th class="pb-3 font-semibold">Property</th>
+              <th class="pb-3 font-semibold">Tenant</th>
+              <th class="pb-3 font-semibold">Requested Date</th>
+              <th class="pb-3 font-semibold">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+            {% for visit in rejected_visits %}
+              <tr>
+                <td class="py-4">
+                  <div class="font-medium text-gray-900 dark:text-white">{{ visit.property.title }}</div>
+                </td>
+                <td class="py-4 text-gray-600 dark:text-gray-400">{{ visit.tenant.username }}</td>
+                <td class="py-4 text-gray-600 dark:text-gray-400">{{ visit.preferred_date }}</td>
+                <td class="py-4">
+                  <span class="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 
+                               rounded-full text-sm font-medium">
+                    <i class="fas fa-times-circle mr-1"></i>Rejected
+                  </span>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center py-8">
+        <p class="text-gray-500 dark:text-gray-400">No rejected requests</p>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

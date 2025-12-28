@@ -1,95 +1,116 @@
 {% extends "base.html" %}
-{% block title %}Admin Dashboard | RentalHub{% endblock %}
+{% block title %}Admin Dashboard | Project370{% endblock %}
 
 {% block content %}
 <div class="flex flex-col gap-8">
 
-  <!-- Header + quick links -->
-  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-    <div>
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
-      <p class="text-sm text-gray-500 dark:text-gray-400">
-        Overview of users, properties, bookings and payments.
-      </p>
-    </div>
-
-    <div class="flex flex-wrap gap-2 text-sm">
-      <a href="{% url 'admin-users' %}" class="px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 transition-colors">
-        Manage Users
-      </a>
-      <a href="{% url 'admin-properties' %}" class="px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 transition-colors">
-        Manage Properties
-      </a>
-      <a href="{% url 'admin-payments' %}" class="px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 transition-colors">
-        Manage Payments
-      </a>
-    </div>
+  <!-- Header -->
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
+    <p class="text-sm text-gray-500 dark:text-gray-400">
+      Overview of users, properties, bookings and payments.
+    </p>
   </div>
 
-  <!-- Top stats -->
+  <!-- Quick Actions - Boxed Tiles -->
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+    <a href="{% url 'admin-users' %}" 
+       class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-200 dark:border-gray-700 
+              hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600 transition-all group">
+      <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-3 
+                  group-hover:scale-110 transition-transform">
+        <i class="fas fa-users text-xl text-blue-600 dark:text-blue-400"></i>
+      </div>
+      <p class="font-semibold text-gray-900 dark:text-white">Manage Users</p>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ total_users }} total users</p>
+    </a>
+
+    <a href="{% url 'admin-properties' %}" 
+       class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-200 dark:border-gray-700 
+              hover:shadow-lg hover:border-purple-300 dark:hover:border-purple-600 transition-all group">
+      <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-3 
+                  group-hover:scale-110 transition-transform">
+        <i class="fas fa-building text-xl text-purple-600 dark:text-purple-400"></i>
+      </div>
+      <p class="font-semibold text-gray-900 dark:text-white">Manage Properties</p>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ total_properties }} listings</p>
+    </a>
+
+    <a href="{% url 'admin-payments' %}" 
+       class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-200 dark:border-gray-700 
+              hover:shadow-lg hover:border-orange-300 dark:hover:border-orange-600 transition-all group">
+      <div class="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mb-3 
+                  group-hover:scale-110 transition-transform">
+        <i class="fas fa-credit-card text-xl text-orange-600 dark:text-orange-400"></i>
+      </div>
+      <p class="font-semibold text-gray-900 dark:text-white">Manage Payments</p>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ total_payments }} recorded</p>
+    </a>
+
+    <a href="{% url 'admin-visit-requests' %}" 
+       class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-200 dark:border-gray-700 
+              hover:shadow-lg hover:border-yellow-300 dark:hover:border-yellow-600 transition-all group">
+      <div class="w-12 h-12 rounded-xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center mb-3 
+                  group-hover:scale-110 transition-transform">
+        <i class="fas fa-calendar-check text-xl text-yellow-600 dark:text-yellow-400"></i>
+      </div>
+      <p class="font-semibold text-gray-900 dark:text-white">Visit Requests</p>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ pending_visits }} pending</p>
+    </a>
+
+    <a href="{% url 'admin-bookings' %}" 
+       class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-200 dark:border-gray-700 
+              hover:shadow-lg hover:border-green-300 dark:hover:border-green-600 transition-all group">
+      <div class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-3 
+                  group-hover:scale-110 transition-transform">
+        <i class="fas fa-shopping-bag text-xl text-green-600 dark:text-green-400"></i>
+      </div>
+      <p class="font-semibold text-gray-900 dark:text-white">Bookings</p>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ total_bookings }} total</p>
+    </a>
+  </div>
+
+  <!-- Stats Overview -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border border-gray-200 dark:border-gray-700">
-      <p class="text-xs uppercase text-gray-500 dark:text-gray-400 mb-1">Users</p>
-      <p class="text-2xl font-semibold text-gray-900 dark:text-white mb-1">{{ total_users }}</p>
-      <p class="text-xs text-gray-500 dark:text-gray-400">
-        Sellers: <span class="font-medium">{{ total_sellers }}</span> ·
-        Tenants: <span class="font-medium">{{ total_tenants }}</span>
-      </p>
-    </div>
-
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border border-gray-200 dark:border-gray-700">
-      <p class="text-xs uppercase text-gray-500 dark:text-gray-400 mb-1">Properties</p>
-      <p class="text-2xl font-semibold text-gray-900 dark:text-white mb-1">{{ total_properties }}</p>
-      <p class="text-xs text-gray-500 dark:text-gray-400">
-        Total active listings in the system.
-      </p>
-    </div>
-
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border border-gray-200 dark:border-gray-700">
-      <p class="text-xs uppercase text-gray-500 dark:text-gray-400 mb-1">Bookings & Payments</p>
-      <p class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ total_bookings }} bookings</p>
-      <p class="text-xs text-gray-500 dark:text-gray-400">
-        Payments recorded: <span class="font-medium">{{ total_payments }}</span>
-      </p>
-    </div>
-  </div>
-
-  <!-- Pending items -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border border-gray-200 dark:border-gray-700">
-      <div class="flex items-center justify-between mb-2">
-        <p class="text-sm font-semibold text-gray-900 dark:text-white">Pending Payments</p>
-        <a href="{% url 'admin-payments' %}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
-          View details →
-        </a>
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-200 dark:border-gray-700">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+          <i class="fas fa-user-group text-2xl text-blue-600 dark:text-blue-400"></i>
+        </div>
+        <div>
+          <p class="text-xs uppercase text-gray-500 dark:text-gray-400">Total Users</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_users }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            {{ total_sellers }} Sellers · {{ total_tenants }} Tenants
+          </p>
+        </div>
       </div>
-      <p class="text-3xl font-bold text-gray-900 dark:text-white mb-1">{{ pending_payments }}</p>
-      <p class="text-xs text-gray-500 dark:text-gray-400">
-        Payments awaiting admin approval.
-      </p>
-      <a href="{% url 'admin-payments' %}" class="inline-flex items-center gap-2 text-orange-600 font-semibold hover:gap-3 transition-all">
-        Review Payments
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-        </svg>
-      </a>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border border-gray-200 dark:border-gray-700">
-      <div class="flex items-center justify-between mb-2">
-        <p class="text-sm font-semibold text-gray-900 dark:text-white">Pending Visit Requests</p>
-        <!-- later you can link to a visits page -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-200 dark:border-gray-700">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+          <i class="fas fa-home text-2xl text-purple-600 dark:text-purple-400"></i>
+        </div>
+        <div>
+          <p class="text-xs uppercase text-gray-500 dark:text-gray-400">Properties</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_properties }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Active listings</p>
+        </div>
       </div>
-      <p class="text-3xl font-bold text-gray-900 dark:text-white mb-1">{{ pending_visits }}</p>
-      <p class="text-xs text-gray-500 dark:text-gray-400">
-        Visit requests from tenants that are still pending.
-      </p>
-      <button disabled class="inline-flex items-center gap-2 text-gray-400 font-semibold cursor-not-allowed">
-        Coming Soon
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-        </svg>
-      </button>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-200 dark:border-gray-700">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+          <i class="fas fa-chart-line text-2xl text-green-600 dark:text-green-400"></i>
+        </div>
+        <div>
+          <p class="text-xs uppercase text-gray-500 dark:text-gray-400">Bookings & Payments</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_bookings }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">{{ total_payments }} payments</p>
+        </div>
+      </div>
     </div>
   </div>
 

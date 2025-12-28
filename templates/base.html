@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Modern Property Rental Management System" />
 
-    <title>{% block title %}RentalHub - Modern Property Management{% endblock %}</title>
+    <title>{% block title %}Project370 - Modern Property Management{% endblock %}</title>
 
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -42,6 +42,8 @@
              dark:from-gray-900 dark:via-slate-900 dark:to-gray-900
              min-h-screen transition-colors duration-300">
 
+{% load static %}
+
 <!-- NAVBAR -->
 <nav id="navbar"
      class="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80
@@ -51,14 +53,11 @@
 
             <!-- Logo -->
             <a href="{% url 'home' %}" class="flex items-center gap-3">
-                <span class="w-10 h-10 flex items-center justify-center
-                             bg-gradient-to-br from-blue-600 to-indigo-700
-                             text-white rounded-xl shadow">
-                    <i class="fas fa-home"></i>
-                </span>
+                <img src="{% static 'project_logo.jpg' %}" alt="Project370 Logo" 
+                     class="w-10 h-10 rounded-xl shadow object-cover">
                 <div>
                     <div class="font-bold text-xl text-gray-900 dark:text-white">
-                        RentalHub
+                        Project370
                     </div>
                     <div class="text-xs text-gray-500 dark:text-gray-400">
                         Property Management
@@ -111,6 +110,15 @@
                     </form>
 
                 {% else %}
+                    <!-- Register -->
+                    <a href="{% url 'register' %}"
+                       class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg
+                              border-2 border-blue-600 text-blue-600 dark:text-blue-400
+                              hover:bg-blue-50 dark:hover:bg-blue-900/30
+                              font-medium text-sm transition-all">
+                        <i class="fas fa-user-plus"></i>
+                        Register
+                    </a>
                     <!-- Login -->
                     <a href="{% url 'login' %}"
                        class="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg
@@ -137,7 +145,7 @@
                border-gray-200/50 dark:border-gray-700/50">
     <div class="max-w-7xl mx-auto px-6 py-6 text-center text-sm
                 text-gray-500 dark:text-gray-400">
-        © 2025 RentalHub. Built with ❤️ by Your Team
+        © 2025 Project370. Built with ❤️ by Group 1
     </div>
 </footer>
 

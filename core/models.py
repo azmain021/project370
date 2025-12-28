@@ -149,9 +149,6 @@ class Booking(models.Model):
         limit_choices_to={'role': 'TENANT'},
     )
 
-    start_date = models.DateField()
-    end_date = models.DateField()
-
     status = models.CharField(
         max_length=10,
         choices=STATUS_CHOICES,
