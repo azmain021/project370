@@ -11,7 +11,21 @@ from .models import User, Property, Booking, Payment, VisitRequest
 # =========================
 
 def home(request):
-    return render(request, "home.html")
+    # Get featured properties first
+    featured = list(Property.objects.filter(is_featured=True, status="AVAILABLE")[:6])
+    
+    # If less than 6 featured, fill with random available properties
+    if len(featured) < 6:
+        exclude_ids = [p.id for p in featured]
+        remaining = 6 - len(featured)
+        random_properties = list(
+            Property.objects.filter(status="AVAILABLE")
+            .exclude(id__in=exclude_ids)
+            .order_by("?")[:remaining]
+        )
+        featured.extend(random_properties)
+    
+    return render(request, "home.html", {"featured_properties": featured})
 
 
 # =========================
@@ -230,12 +244,20 @@ def admin_properties(request):
     if request.user.role != "ADMIN":
         return redirect("home")
 
-    # Handle delete
+    # Handle POST actions
     if request.method == "POST":
         prop_id = request.POST.get("property_id")
+        action = request.POST.get("action", "delete")
+        
         try:
             prop = Property.objects.get(id=prop_id)
-            prop.delete()
+            
+            if action == "toggle_featured":
+                prop.is_featured = not prop.is_featured
+                prop.save()
+            elif action == "delete":
+                prop.delete()
+                
         except Property.DoesNotExist:
             pass
         return redirect("admin-properties")

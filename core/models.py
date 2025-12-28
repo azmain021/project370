@@ -74,6 +74,8 @@ class Property(models.Model):
         null=True
     )
 
+    is_featured = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -215,127 +217,91 @@ class Payment(models.Model):
         return f"Payment {self.id} ({self.status})"
 
 
+# ============================================================================
+# SQL COMMANDS FOR ALL MODELS
+# ============================================================================
 
-"""
-CREATE TABLE user (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    
-    username VARCHAR(150) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,     # hashed password stored by Django auth
-    email VARCHAR(254),
+# ----------------------------------------------------------------------------
+# USER TABLE (extends Django's AbstractUser)
+# ----------------------------------------------------------------------------
+# CREATE TABLE core_user (
+#     id INTEGER PRIMARY KEY AUTOINCREMENT,
+#     password VARCHAR(128) NOT NULL,
+#     last_login DATETIME,
+#     is_superuser BOOLEAN NOT NULL DEFAULT 0,
+#     username VARCHAR(150) NOT NULL UNIQUE,
+#     first_name VARCHAR(150) NOT NULL,
+#     last_name VARCHAR(150) NOT NULL,
+#     email VARCHAR(254) NOT NULL,
+#     is_staff BOOLEAN NOT NULL DEFAULT 0,
+#     is_active BOOLEAN NOT NULL DEFAULT 1,
+#     date_joined DATETIME NOT NULL,
+#     role VARCHAR(10) NOT NULL CHECK (role IN ('ADMIN', 'SELLER', 'TENANT', 'AGENT')),
+#     phone_number VARCHAR(15),
+#     address TEXT
+# );
 
-    role ENUM('ADMIN', 'SELLER', 'TENANT', 'AGENT') NOT NULL,
+# ----------------------------------------------------------------------------
+# PROPERTY TABLE
+# ----------------------------------------------------------------------------
+# CREATE TABLE core_property (
+#     id INTEGER PRIMARY KEY AUTOINCREMENT,
+#     seller_id INTEGER NOT NULL,
+#     title VARCHAR(100) NOT NULL,
+#     address TEXT NOT NULL,
+#     city VARCHAR(50) NOT NULL,
+#     property_type VARCHAR(10) NOT NULL CHECK (property_type IN ('SELL', 'RENT')),
+#     price DECIMAL(10, 2) NOT NULL,
+#     status VARCHAR(20) NOT NULL DEFAULT 'AVAILABLE' CHECK (status IN ('AVAILABLE', 'BOOKED', 'INACTIVE')),
+#     description TEXT,
+#     image VARCHAR(100),
+#     is_featured BOOLEAN NOT NULL DEFAULT 0,
+#     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+#     FOREIGN KEY (seller_id) REFERENCES core_user(id) ON DELETE CASCADE
+# );
 
-    phone_number VARCHAR(15),
-    address TEXT,
+# ----------------------------------------------------------------------------
+# VISIT REQUEST TABLE
+# ----------------------------------------------------------------------------
+# CREATE TABLE core_visitrequest (
+#     id INTEGER PRIMARY KEY AUTOINCREMENT,
+#     property_id INTEGER NOT NULL,
+#     tenant_id INTEGER NOT NULL,
+#     agent_id INTEGER,
+#     preferred_date DATE NOT NULL,
+#     status VARCHAR(10) NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
+#     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+#     FOREIGN KEY (property_id) REFERENCES core_property(id) ON DELETE CASCADE,
+#     FOREIGN KEY (tenant_id) REFERENCES core_user(id) ON DELETE CASCADE,
+#     FOREIGN KEY (agent_id) REFERENCES core_user(id) ON DELETE SET NULL
+# );
 
-    is_staff BOOLEAN DEFAULT FALSE,      # required for admin access
-    is_superuser BOOLEAN DEFAULT FALSE,  # required for super admin
-    last_login DATETIME,
-    date_joined DATETIME,
+# ----------------------------------------------------------------------------
+# BOOKING TABLE
+# ----------------------------------------------------------------------------
+# CREATE TABLE core_booking (
+#     id INTEGER PRIMARY KEY AUTOINCREMENT,
+#     property_id INTEGER NOT NULL,
+#     tenant_id INTEGER NOT NULL,
+#     status VARCHAR(10) NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED')),
+#     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+#     FOREIGN KEY (property_id) REFERENCES core_property(id) ON DELETE CASCADE,
+#     FOREIGN KEY (tenant_id) REFERENCES core_user(id) ON DELETE CASCADE
+# );
 
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
-
-CREATE TABLE property (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-
-    seller_id INT NOT NULL,              # FK → user(id)
-
-    title VARCHAR(100) NOT NULL,
-    address TEXT NOT NULL,
-    city VARCHAR(50) NOT NULL,
-
-    property_type ENUM('SELL', 'RENT') NOT NULL,
-    price DECIMAL(10,2) NOT NULL,
-
-    description TEXT,
-    image VARCHAR(255),                  # image file path
-
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (seller_id)
-        REFERENCES user(id)
-        ON DELETE CASCADE
-);
-
-
-CREATE TABLE visit_request (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-
-    property_id INT NOT NULL,             # FK → property(id)
-    tenant_id INT NOT NULL,               # FK → user(id)
-    agent_id INT,                         # FK → user(id), nullable
-
-    preferred_date DATE NOT NULL,
-
-    status ENUM('PENDING', 'APPROVED', 'REJECTED')
-           DEFAULT 'PENDING',
-
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (property_id)
-        REFERENCES property(id)
-        ON DELETE CASCADE,
-
-    FOREIGN KEY (tenant_id)
-        REFERENCES user(id)
-        ON DELETE CASCADE,
-
-    FOREIGN KEY (agent_id)
-        REFERENCES user(id)
-        ON DELETE SET NULL
-);
-
-CREATE TABLE booking (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-
-    property_id INT NOT NULL,             # FK → property(id)
-    tenant_id INT NOT NULL,               # FK → user(id)
-
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
-
-    status ENUM('PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED')
-           DEFAULT 'PENDING',
-
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (property_id)
-        REFERENCES property(id)
-        ON DELETE CASCADE,
-
-    FOREIGN KEY (tenant_id)
-        REFERENCES user(id)
-        ON DELETE CASCADE
-);
-
-CREATE TABLE payment (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-
-    booking_id INT NOT NULL,              # FK → booking(id)
-
-    amount DECIMAL(10,2) NOT NULL,
-    platform_cut DECIMAL(10,2) DEFAULT 0,
-    seller_amount DECIMAL(10,2) DEFAULT 0,
-
-    status ENUM('PENDING', 'APPROVED', 'REJECTED')
-           DEFAULT 'PENDING',
-
-    approved_by_admin INT,                # FK → user(id)
-    approved_at DATETIME,
-
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (booking_id)
-        REFERENCES booking(id)
-        ON DELETE CASCADE,
-
-    FOREIGN KEY (approved_by_admin)
-        REFERENCES user(id)
-        ON DELETE SET NULL
-);
-
-
-"""
+# ----------------------------------------------------------------------------
+# PAYMENT TABLE
+# ----------------------------------------------------------------------------
+# CREATE TABLE core_payment (
+#     id INTEGER PRIMARY KEY AUTOINCREMENT,
+#     booking_id INTEGER NOT NULL,
+#     amount DECIMAL(10, 2) NOT NULL,
+#     platform_cut DECIMAL(10, 2) NOT NULL DEFAULT 0,
+#     seller_amount DECIMAL(10, 2) NOT NULL DEFAULT 0,
+#     status VARCHAR(10) NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
+#     approved_by_admin_id INTEGER,
+#     approved_at DATETIME,
+#     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+#     FOREIGN KEY (booking_id) REFERENCES core_booking(id) ON DELETE CASCADE,
+#     FOREIGN KEY (approved_by_admin_id) REFERENCES core_user(id) ON DELETE SET NULL
+# );
