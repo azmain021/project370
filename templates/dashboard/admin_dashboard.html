@@ -13,7 +13,7 @@
   </div>
 
   <!-- Quick Actions - Boxed Tiles -->
-  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
     <a href="{% url 'admin-users' %}" 
        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-200 dark:border-gray-700 
               hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600 transition-all group">
@@ -67,6 +67,17 @@
       </div>
       <p class="font-semibold text-gray-900 dark:text-white">Bookings</p>
       <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ total_bookings }} total</p>
+    </a>
+
+    <a href="{% url 'admin-deals' %}" 
+       class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-200 dark:border-gray-700 
+              hover:shadow-lg hover:border-teal-300 dark:hover:border-teal-600 transition-all group">
+      <div class="w-12 h-12 rounded-xl bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center mb-3 
+                  group-hover:scale-110 transition-transform">
+        <i class="fas fa-handshake text-xl text-teal-600 dark:text-teal-400"></i>
+      </div>
+      <p class="font-semibold text-gray-900 dark:text-white">Completed Deals</p>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ completed_deals }} deals</p>
     </a>
   </div>
 

@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.utils import timezone
+from decimal import Decimal
 
 from .models import User, Property, Booking, Payment, VisitRequest
 
@@ -157,6 +158,7 @@ def admin_dashboard(request):
     total_properties = Property.objects.count()
     total_bookings = Booking.objects.count()
     total_payments = Payment.objects.count()
+    completed_deals = Payment.objects.filter(seller_amount_sent=True).count()
 
     pending_payments = Payment.objects.filter(status="PENDING").count()
     pending_visits = VisitRequest.objects.filter(status="PENDING").count()
@@ -169,6 +171,7 @@ def admin_dashboard(request):
         "total_properties": total_properties,
         "total_bookings": total_bookings,
         "total_payments": total_payments,
+        "completed_deals": completed_deals,
         "pending_payments": pending_payments,
         "pending_visits": pending_visits,
         "pending_bookings": pending_bookings,
@@ -252,7 +255,7 @@ def admin_properties(request):
         return redirect("admin-properties")
 
     # Show all properties
-    properties = Property.objects.select_related("seller").all()
+    properties = list(Property.objects.select_related("seller").all())
 
     context = {
         "properties": properties,
@@ -305,23 +308,41 @@ def admin_payments(request):
     if request.user.role != "ADMIN":
         return redirect("home")
 
-    # If admin clicked "Approve" button
+    # If admin clicked "Approve" button or "Send to Seller" button
     if request.method == "POST":
+        action = request.POST.get("action")
         payment_id = request.POST.get("payment_id")
+        
         try:
-            payment = Payment.objects.get(id=payment_id, status="PENDING")
+            payment = Payment.objects.get(id=payment_id)
         except Payment.DoesNotExist:
             payment = None
 
         if payment:
-            # 10% platform cut example
-            payment.platform_cut = payment.amount * 0.10
-            payment.seller_amount = payment.amount - payment.platform_cut
+            if action == "approve":
+                # Only approve if currently pending
+                if payment.status == "PENDING":
+                    # 10% platform cut example
+                    payment.platform_cut = payment.amount * Decimal('0.10')
+                    payment.seller_amount = payment.amount - payment.platform_cut
 
-            payment.status = "APPROVED"
-            payment.approved_by_admin = request.user
-            payment.approved_at = timezone.now()
-            payment.save()
+                    payment.status = "APPROVED"
+                    payment.approved_by_admin = request.user
+                    payment.approved_at = timezone.now()
+                    
+                    # Mark property as BOOKED (sold) if it's a SELL property
+                    if payment.booking.property.property_type == "SELL":
+                        payment.booking.property.status = "BOOKED"
+                        payment.booking.property.save()
+                    
+                    payment.save()
+            
+            elif action == "send_to_seller":
+                # Only send if approved and not already sent
+                if payment.status == "APPROVED" and not payment.seller_amount_sent:
+                    payment.seller_amount_sent = True
+                    payment.seller_amount_sent_at = timezone.now()
+                    payment.save()
 
         return redirect("admin-payments")
 
@@ -333,14 +354,46 @@ def admin_payments(request):
 
     approved_payments = Payment.objects.filter(status="APPROVED").order_by(
         "-approved_at"
-    )[:10]
+    ).select_related(
+        "booking__property",
+        "booking__tenant",
+        "approved_by_admin"
+    )
+
+    # Calculate total platform cuts for all approved payments
+    total_platform_cut = sum(p.platform_cut for p in approved_payments)
 
     context = {
         "pending_payments": pending_payments,
         "approved_payments": approved_payments,
+        "total_platform_cut": total_platform_cut,
     }
 
     return render(request, "dashboard/admin_payments.html", context)
+
+
+def admin_deals(request):
+    """
+    Show all completed deals/transactions (payments with seller_amount_sent=True)
+    """
+    # Only admin can access this page
+    if request.user.role != "ADMIN":
+        return redirect("home")
+
+    # Get all completed deals (payments where seller amount has been sent)
+    completed_deals = Payment.objects.filter(
+        seller_amount_sent=True
+    ).select_related(
+        "booking__property__seller",
+        "booking__tenant",
+        "approved_by_admin"
+    ).order_by("-seller_amount_sent_at")
+
+    context = {
+        "completed_deals": completed_deals,
+    }
+
+    return render(request, "dashboard/admin_deals.html", context)
 
 
 # =========================
@@ -353,8 +406,8 @@ def tenant_dashboard(request):
     if request.user.role != "TENANT":
         return redirect("home")
 
-    # Fetch ALL properties (added by admin or seller)
-    properties = Property.objects.select_related("seller").all()
+    # Fetch available properties only (exclude BOOKED/SOLD properties)
+    properties = Property.objects.select_related("seller").filter(status="AVAILABLE")
 
     context = {
         "properties": properties,
@@ -616,3 +669,57 @@ def admin_bookings(request):
     }
 
     return render(request, "dashboard/admin_bookings.html", context)
+
+
+# =========================
+# TENANT PAYMENT
+# =========================
+
+@login_required
+def initiate_payment(request, booking_id):
+    """
+    Tenant initiates payment for a confirmed booking
+    """
+    if request.user.role != "TENANT":
+        return redirect("home")
+
+    try:
+        booking = Booking.objects.get(id=booking_id, tenant=request.user, status="CONFIRMED")
+    except Booking.DoesNotExist:
+        return redirect("tenant-my-bookings")
+
+    # Check if payment already exists for this booking
+    existing_payment = Payment.objects.filter(booking=booking).exists()
+    
+    if not existing_payment:
+        # Create a new payment record
+        Payment.objects.create(
+            booking=booking,
+            amount=booking.property.price,
+            status="PENDING"
+        )
+
+    return redirect("payment-confirmation", booking_id=booking_id)
+
+
+@login_required
+def payment_confirmation(request, booking_id):
+    """
+    Display payment confirmation page
+    """
+    if request.user.role != "TENANT":
+        return redirect("home")
+
+    try:
+        booking = Booking.objects.get(id=booking_id, tenant=request.user)
+        payment = Payment.objects.get(booking=booking)
+    except (Booking.DoesNotExist, Payment.DoesNotExist):
+        return redirect("tenant-my-bookings")
+
+    context = {
+        "booking": booking,
+        "payment": payment,
+    }
+
+    return render(request, "dashboard/payment_confirmation.html", context)
+

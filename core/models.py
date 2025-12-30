@@ -58,7 +58,7 @@ class Property(models.Model):
     )
 
     price = models.DecimalField(
-        max_digits=10,
+        max_digits=15,
         decimal_places=2
     )
 
@@ -180,15 +180,16 @@ class Payment(models.Model):
         related_name='payments'
     )
 
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
 
     platform_cut = models.DecimalField(
-        max_digits=10,
+        max_digits=15,
         decimal_places=2,
         default=0
     )
 
-    seller_amount = models.DecimalField( max_digits=10,
+    seller_amount = models.DecimalField(
+        max_digits=15,
         decimal_places=2,
         default=0
     )
@@ -209,6 +210,13 @@ class Payment(models.Model):
     )
 
     approved_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    seller_amount_sent = models.BooleanField(default=False)
+
+    seller_amount_sent_at = models.DateTimeField(
         null=True,
         blank=True
     )
