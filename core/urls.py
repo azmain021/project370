@@ -31,5 +31,26 @@ urlpatterns = [
     path("dashboard/tenant/payment/<int:booking_id>/confirmation/", views.payment_confirmation, name="payment-confirmation"),
 
 
+    # Seller dashboard
+    path("dashboard/seller/", views.seller_dashboard, name="seller-dashboard"),
+
+    # Properties CRUD
+    path("dashboard/seller/properties/", views.seller_properties, name="seller_properties"),
+    path("dashboard/seller/properties/add/", views.add_property, name="seller_add_property"),
+    path("dashboard/seller/properties/edit/<int:property_id>/", views.edit_property, name="seller_edit_property"),
+    path("dashboard/seller/properties/delete/<int:property_id>/", views.delete_property, name="seller_delete_property"),
+
+    # Appointments (Visit Requests)
+    path("dashboard/seller/appointments/", views.seller_appointments, name="seller_appointments"),
+
+    # Bookings
+    path("dashboard/seller/bookings/", views.seller_bookings, name="seller_bookings"),
+
+    # Payments
+    path("dashboard/seller/payments/", views.seller_payments, name="seller_payments"),
+
+
+  
+
 
 ]

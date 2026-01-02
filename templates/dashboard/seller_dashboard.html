@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-4">Seller Dashboard</h1>
+
+    <!-- Dashboard Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white shadow rounded p-4">
+            <h2 class="font-semibold text-lg">Properties</h2>
+            <p class="text-2xl">{{ properties|length }}</p>
+            <a href="{% url 'seller_properties' %}" class="text-blue-500 hover:underline">View Properties</a>
+        </div>
+
+        <div class="bg-white shadow rounded p-4">
+            <h2 class="font-semibold text-lg">Bookings</h2>
+            <p class="text-2xl">{{ bookings|length }}</p>
+            <a href="{% url 'seller_bookings' %}" class="text-blue-500 hover:underline">View Bookings</a>
+        </div>
+
+        <div class="bg-white shadow rounded p-4">
+            <h2 class="font-semibold text-lg">Appointments</h2>
+            <p class="text-2xl">{{ appointments|length }}</p>
+            <a href="{% url 'seller_appointments' %}" class="text-blue-500 hover:underline">View Appointments</a>
+        </div>
+
+        <div class="bg-white shadow rounded p-4">
+            <h2 class="font-semibold text-lg">Payments</h2>
+            <p class="text-2xl">${{ payments_total }}</p>
+            <a href="{% url 'seller_payments' %}" class="text-blue-500 hover:underline">View Payments</a>
+        </div>
+    </div>
+
+    <!-- Add Property Button -->
+    <a href="{% url 'seller_add_property' %}" class="bg-green-500 text-white px-4 py-2 rounded mb-4 inline-block">Add Property</a>
+
+    <!-- Recent Properties -->
+    <h2 class="text-xl font-semibold mb-2">Your Properties</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {% for prop in properties %}
+        <div class="bg-white shadow rounded p-4">
+            {% if prop.images.first %}
+            <img src="{{ prop.images.first.image.url }}" alt="{{ prop.title }}" class="w-full h-48 object-cover mb-2 rounded">
+            {% endif %}
+            <h3 class="font-semibold">{{ prop.title }}</h3>
+            <p class="text-gray-600">{{ prop.city }}</p>
+            <p class="text-gray-700 font-bold">Price: ${{ prop.price }}</p>
+            <p>Status: <span class="font-semibold">{{ prop.status }}</span></p>
+            <div class="mt-2 flex gap-2">
+                <a href="{% url 'seller_edit_property' prop.id %}" class="bg-blue-500 text-white px-2 py-1 rounded">Edit</a>
+                <form method="POST" action="{% url 'seller_delete_property' prop.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="bg-red-500 text-white px-2 py-1 rounded">Delete</button>
+                </form>
+            </div>
+        </div>
+        {% empty %}
+        <p>No properties added yet.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Current Tenants -->
+    <h2 class="text-xl font-semibold mt-6 mb-2">Current Tenants</h2>
+    {% if bookings %}
+        <table class="table-auto w-full border-collapse border">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="border px-2 py-1">Tenant</th>
+                    <th class="border px-2 py-1">Property</th>
+                    <th class="border px-2 py-1">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                    {% if booking.status == "BOOKED" %}
+                    <tr>
+                        <td class="border px-2 py-1">{{ booking.tenant.username }}</td>
+                        <td class="border px-2 py-1">{{ booking.property.title }}</td>
+                        <td class="border px-2 py-1">{{ booking.status }}</td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No current tenants.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

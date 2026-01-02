@@ -71,12 +71,6 @@ class Property(models.Model):
 
     description = models.TextField(blank=True)
 
-    image = models.ImageField(
-        upload_to="property_images/",
-        blank=True,
-        null=True
-    )
-
     is_featured = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -84,7 +78,18 @@ class Property(models.Model):
     def __str__(self):
         return f"{self.title} ({self.status})"
 
+class PropertyImage(models.Model):
+    property = models.ForeignKey(
+        Property,
+        on_delete=models.CASCADE,
+        related_name="images"
+    )
 
+    image = models.ImageField(upload_to="property_images/")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Image for {self.property.title}"
 
 class VisitRequest(models.Model):
 

@@ -799,3 +799,184 @@ def payment_confirmation(request, booking_id):
 
     return render(request, "dashboard/payment_confirmation.html", context)
 
+# =========================
+# SELLER DASHBOARD & MANAGEMENT
+# =========================
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
+from decimal import Decimal
+from django.utils import timezone
+from .models import Property, Booking, VisitRequest, Payment, PropertyImage
+
+# -------------------------
+# Seller Dashboard (cards)
+# -------------------------
+@login_required
+def seller_dashboard(request):
+    if request.user.role != "SELLER":
+        return redirect("home")
+
+    seller = request.user
+    properties = Property.objects.filter(seller=seller)
+
+    total_bookings = Booking.objects.filter(property__in=properties).count()
+    completed_deals = Booking.objects.filter(property__in=properties, status="COMPLETED").count()
+    total_payments = Payment.objects.filter(
+        booking__property__in=properties, status="APPROVED"
+    ).aggregate(Sum("amount"))["amount__sum"] or 0
+    pending_payments = Payment.objects.filter(
+        booking__property__in=properties, status="PENDING"
+    ).aggregate(Sum("amount"))["amount__sum"] or 0
+    total_appointments = VisitRequest.objects.filter(property__in=properties).count()
+
+    context = {
+        "properties_count": properties.count(),
+        "total_bookings": total_bookings,
+        "completed_deals": completed_deals,
+        "total_payments": total_payments,
+        "pending_payments": pending_payments,
+        "total_appointments": total_appointments,
+    }
+    return render(request, "dashboard/seller_dashboard.html", context)
+
+
+# -------------------------
+# Properties List / CRUD
+# -------------------------
+@login_required
+def seller_properties(request):
+    if request.user.role != "SELLER":
+        return redirect("home")
+
+    properties = Property.objects.filter(seller=request.user).order_by("-created_at")
+
+    context = {"properties": properties}
+    return render(request, "dashboard/seller_properties.html", context)
+
+
+@login_required
+def add_property(request):
+    if request.user.role != "SELLER":
+        return redirect("home")
+
+    if request.method == "POST":
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        address = request.POST.get("address")
+        city = request.POST.get("city")
+        price = request.POST.get("price")
+        property_type = request.POST.get("property_type")
+        is_featured = True if request.POST.get("is_featured") == "on" else False
+
+        prop = Property.objects.create(
+            title=title,
+            description=description,
+            address=address,
+            city=city,
+            price=price,
+            property_type=property_type,
+            is_featured=is_featured,
+            seller=request.user,
+        )
+
+        images = request.FILES.getlist("images")
+        for img in images:
+            PropertyImage.objects.create(property=prop, image=img)
+
+        return redirect("seller_properties")
+
+    return render(request, "dashboard/seller_add_property.html")
+
+
+@login_required
+def edit_property(request, property_id):
+    prop = get_object_or_404(Property, id=property_id, seller=request.user)
+
+    if request.method == "POST":
+        prop.title = request.POST.get("title")
+        prop.description = request.POST.get("description")
+        prop.address = request.POST.get("address")
+        prop.city = request.POST.get("city")
+        prop.price = request.POST.get("price")
+        prop.property_type = request.POST.get("property_type")
+        prop.is_featured = True if request.POST.get("is_featured") == "on" else False
+        prop.save()
+
+        # Add new images
+        images = request.FILES.getlist("images")
+        for img in images:
+            PropertyImage.objects.create(property=prop, image=img)
+
+        # Delete selected images
+        delete_images = request.POST.getlist("delete_images")
+        if delete_images:
+            PropertyImage.objects.filter(id__in=delete_images, property=prop).delete()
+
+        return redirect("seller_properties")
+
+    context = {
+        "property": prop,
+        "images": prop.images.all(),
+    }
+    return render(request, "dashboard/seller_add_property.html", context)
+
+
+@login_required
+def delete_property(request, property_id):
+    prop = get_object_or_404(Property, id=property_id, seller=request.user)
+    if request.method == "POST":
+        prop.delete()
+    return redirect("seller_properties")
+
+
+# -------------------------
+# Appointments List
+# -------------------------
+@login_required
+def seller_appointments(request):
+    if request.user.role != "SELLER":
+        return redirect("home")
+
+    properties = Property.objects.filter(seller=request.user)
+    appointments = VisitRequest.objects.filter(property__in=properties).select_related(
+        "property", "tenant", "agent"
+    ).order_by("-created_at")
+
+    context = {"appointments": appointments}
+    return render(request, "dashboard/seller_appointments.html", context)
+
+
+# -------------------------
+# Bookings List
+# -------------------------
+@login_required
+def seller_bookings(request):
+    if request.user.role != "SELLER":
+        return redirect("home")
+
+    properties = Property.objects.filter(seller=request.user)
+    bookings = Booking.objects.filter(property__in=properties).select_related(
+        "property", "tenant"
+    ).order_by("-created_at")
+
+    context = {"bookings": bookings}
+    return render(request, "dashboard/seller_bookings.html", context)
+
+
+# -------------------------
+# Payments List
+# -------------------------
+@login_required
+def seller_payments(request):
+    if request.user.role != "SELLER":
+        return redirect("home")
+
+    properties = Property.objects.filter(seller=request.user)
+    payments = Payment.objects.filter(booking__property__in=properties).select_related(
+        "booking", "booking__tenant"
+    ).order_by("-created_at")
+
+    context = {"payments": payments}
+    return render(request, "dashboard/seller_payments.html", context)
