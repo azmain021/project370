@@ -25,6 +25,10 @@
            class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full text-sm font-medium transition-all">
           <i class="fas fa-shopping-bag mr-2"></i>My Bookings
         </a>
+        <a href="{% url 'tenant-my-properties' %}" 
+           class="px-4 py-2 bg-green-500 hover:bg-green-600 rounded-full text-sm font-medium transition-all shadow-md">
+          <i class="fas fa-key mr-2"></i>Confirmed ({{ confirmed_properties_count }})
+        </a>
         <span class="px-4 py-2 bg-white/20 rounded-full text-sm font-medium">
           <i class="fas fa-building mr-2"></i>{{ properties|length }} Properties Available
         </span>

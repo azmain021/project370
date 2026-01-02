@@ -26,6 +26,7 @@ urlpatterns = [
     path("dashboard/tenant/my-visits/", views.tenant_my_visits, name="tenant-my-visits"),
     path("dashboard/tenant/book/<int:property_id>/", views.book_property, name="book-property"),
     path("dashboard/tenant/my-bookings/", views.tenant_my_bookings, name="tenant-my-bookings"),
+    path("dashboard/tenant/my-properties/", views.tenant_my_properties, name="tenant-my-properties"),
     path("dashboard/tenant/payment/<int:booking_id>/", views.initiate_payment, name="initiate-payment"),
     path("dashboard/tenant/payment/<int:booking_id>/confirmation/", views.payment_confirmation, name="payment-confirmation"),
 

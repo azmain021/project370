@@ -245,8 +245,10 @@ def admin_properties(request):
             prop = Property.objects.get(id=prop_id)
             
             if action == "toggle_featured":
-                prop.is_featured = not prop.is_featured
-                prop.save()
+                # Only allow featuring if property is not SOLD
+                if prop.status != "SOLD":
+                    prop.is_featured = not prop.is_featured
+                    prop.save()
             elif action == "delete":
                 prop.delete()
                 
@@ -409,8 +411,16 @@ def tenant_dashboard(request):
     # Fetch available properties only (exclude BOOKED/SOLD properties)
     properties = Property.objects.select_related("seller").filter(status="AVAILABLE")
 
+    # Count confirmed/purchased properties (completed bookings with approved payments)
+    confirmed_properties_count = Booking.objects.filter(
+        tenant=request.user,
+        status="COMPLETED",
+        payments__status="APPROVED"
+    ).distinct().count()
+
     context = {
         "properties": properties,
+        "confirmed_properties_count": confirmed_properties_count,
     }
 
     return render(request, "dashboard/tenant_dashboard.html", context)
@@ -455,12 +465,23 @@ def request_visit(request, property_id):
 @login_required
 def tenant_my_visits(request):
     """
-    Tenant views their visit requests
+    Tenant views their visit requests (excluding completed/paid properties)
     """
     if request.user.role != "TENANT":
         return redirect("home")
 
-    visits = VisitRequest.objects.filter(tenant=request.user).select_related(
+    # Get property IDs where tenant has completed payment (COMPLETED bookings)
+    completed_property_ids = set(
+        Booking.objects.filter(
+            tenant=request.user,
+            status="COMPLETED"
+        ).values_list("property_id", flat=True)
+    )
+
+    # Exclude visits for properties that have been paid/completed
+    visits = VisitRequest.objects.filter(tenant=request.user).exclude(
+        property_id__in=completed_property_ids
+    ).select_related(
         "property", "agent"
     ).order_by("-created_at")
 
@@ -601,12 +622,15 @@ def book_property(request, property_id):
 @login_required
 def tenant_my_bookings(request):
     """
-    Tenant views their bookings
+    Tenant views their bookings (excluding completed/paid ones)
     """
     if request.user.role != "TENANT":
         return redirect("home")
 
-    bookings = Booking.objects.filter(tenant=request.user).select_related(
+    # Exclude COMPLETED bookings - those are shown in "My Properties"
+    bookings = Booking.objects.filter(tenant=request.user).exclude(
+        status="COMPLETED"
+    ).select_related(
         "property", "property__seller"
     ).order_by("-created_at")
 
@@ -615,6 +639,38 @@ def tenant_my_bookings(request):
     }
 
     return render(request, "dashboard/tenant_my_bookings.html", context)
+
+
+@login_required
+def tenant_my_properties(request):
+    """
+    Tenant views their purchased/paid properties
+    """
+    if request.user.role != "TENANT":
+        return redirect("home")
+
+    # Get all completed bookings with approved payments
+    completed_bookings = Booking.objects.filter(
+        tenant=request.user,
+        status="COMPLETED"
+    ).select_related("property", "property__seller").prefetch_related("payments")
+
+    # Build list of paid properties with payment info
+    paid_properties = []
+    for booking in completed_bookings:
+        payment = booking.payments.filter(status="APPROVED").first()
+        if payment:
+            paid_properties.append({
+                "property": booking.property,
+                "payment": payment,
+                "booking": booking,
+            })
+
+    context = {
+        "paid_properties": paid_properties,
+    }
+
+    return render(request, "dashboard/tenant_my_properties.html", context)
 
 
 # =========================
@@ -678,7 +734,10 @@ def admin_bookings(request):
 @login_required
 def initiate_payment(request, booking_id):
     """
-    Tenant initiates payment for a confirmed booking
+    Tenant initiates payment for a confirmed booking.
+    Payment is auto-approved (no admin approval needed).
+    Admin can then send amount to seller.
+    Property is removed from site listings upon payment.
     """
     if request.user.role != "TENANT":
         return redirect("home")
@@ -692,12 +751,29 @@ def initiate_payment(request, booking_id):
     existing_payment = Payment.objects.filter(booking=booking).exists()
     
     if not existing_payment:
-        # Create a new payment record
+        # Calculate platform cut (10%) and seller amount
+        amount = booking.property.price
+        platform_cut = amount * Decimal('0.10')
+        seller_amount = amount - platform_cut
+        
+        # Create payment record - auto-approved (no admin approval needed)
         Payment.objects.create(
             booking=booking,
-            amount=booking.property.price,
-            status="PENDING"
+            amount=amount,
+            platform_cut=platform_cut,
+            seller_amount=seller_amount,
+            status="APPROVED",
+            approved_at=timezone.now()
         )
+        
+        # Mark booking as COMPLETED (so Pay Now button disappears)
+        booking.status = "COMPLETED"
+        booking.save()
+        
+        # Mark property as SOLD and remove from featured
+        booking.property.status = "SOLD"
+        booking.property.is_featured = False
+        booking.property.save()
 
     return redirect("payment-confirmation", booking_id=booking_id)
 

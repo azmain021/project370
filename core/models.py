@@ -33,6 +33,7 @@ class Property(models.Model):
     STATUS_CHOICES = (
         ("AVAILABLE", "Available"),
         ("BOOKED", "Booked"),
+        ("SOLD", "Sold"),
         ("INACTIVE", "Inactive"),
     )
 
