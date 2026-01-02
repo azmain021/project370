@@ -866,7 +866,6 @@ def add_property(request):
         city = request.POST.get("city")
         price = request.POST.get("price")
         property_type = request.POST.get("property_type")
-        is_featured = True if request.POST.get("is_featured") == "on" else False
 
         prop = Property.objects.create(
             title=title,
@@ -875,7 +874,6 @@ def add_property(request):
             city=city,
             price=price,
             property_type=property_type,
-            is_featured=is_featured,
             seller=request.user,
         )
 
@@ -900,7 +898,6 @@ def edit_property(request, property_id):
         prop.city = request.POST.get("city")
         prop.price = request.POST.get("price")
         prop.property_type = request.POST.get("property_type")
-        prop.is_featured = True if request.POST.get("is_featured") == "on" else False
         prop.save()
 
         # Add new images
