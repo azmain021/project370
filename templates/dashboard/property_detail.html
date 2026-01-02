@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+  
+  <!-- Back Button -->
+  <a href="{% url 'tenant-dashboard' %}" 
+     class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline mb-6">
+    <i class="fas fa-arrow-left"></i>
+    Back to Properties
+  </a>
+
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
+    
+    <!-- Image Gallery -->
+    <div class="relative">
+      {% if images %}
+        <!-- Main Image -->
+        <div id="mainImageContainer" class="relative h-96 overflow-hidden">
+          <img id="mainImage" src="{{ images.0.image.url }}" alt="{{ property.title }}" 
+               class="w-full h-full object-cover">
+          
+          <!-- Image Counter -->
+          <div class="absolute bottom-4 right-4 bg-black/60 text-white px-4 py-2 rounded-full text-sm">
+            <i class="fas fa-images mr-2"></i>
+            <span id="currentImageNum">1</span> / {{ images|length }}
+          </div>
+
+          <!-- Navigation Arrows -->
+          {% if images|length > 1 %}
+          <button onclick="prevImage()" 
+                  class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all">
+            <i class="fas fa-chevron-left text-gray-800 text-xl"></i>
+          </button>
+          <button onclick="nextImage()" 
+                  class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all">
+            <i class="fas fa-chevron-right text-gray-800 text-xl"></i>
+          </button>
+          {% endif %}
+        </div>
+
+        <!-- Thumbnail Strip -->
+        {% if images|length > 1 %}
+        <div class="flex gap-2 p-4 bg-gray-100 dark:bg-gray-700 overflow-x-auto">
+          {% for img in images %}
+          <button onclick="showImage({{ forloop.counter0 }})" 
+                  class="thumbnail flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 border-transparent hover:border-blue-500 transition-all {% if forloop.first %}border-blue-500{% endif %}">
+            <img src="{{ img.image.url }}" alt="Thumbnail {{ forloop.counter }}" 
+                 class="w-full h-full object-cover">
+          </button>
+          {% endfor %}
+        </div>
+        {% endif %}
+      {% else %}
+        <!-- No Image Placeholder -->
+        <div class="h-96 bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 flex items-center justify-center">
+          <div class="text-center text-white">
+            <i class="fas fa-home text-8xl mb-4 opacity-50"></i>
+            <p class="text-xl">No images available</p>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Property Details -->
+    <div class="p-8">
+      <!-- Header -->
+      <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            {{ property.title }}
+          </h1>
+          <p class="text-lg text-gray-600 dark:text-gray-300 flex items-center gap-2">
+            <i class="fas fa-map-marker-alt text-blue-600"></i>
+            {{ property.address }}, {{ property.city }}
+          </p>
+        </div>
+        <div class="text-right">
+          <p class="text-3xl font-bold text-blue-600 dark:text-blue-400">
+            ৳ {{ property.price|floatformat:0 }}
+          </p>
+          <span class="inline-block mt-2 px-4 py-2 rounded-full text-sm font-semibold
+                       {% if property.status == 'AVAILABLE' %}bg-green-100 text-green-700
+                       {% elif property.status == 'BOOKED' %}bg-yellow-100 text-yellow-700
+                       {% elif property.status == 'SOLD' %}bg-blue-100 text-blue-700
+                       {% else %}bg-gray-100 text-gray-700{% endif %}">
+            {{ property.get_status_display }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Property Info Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 p-6 bg-gray-50 dark:bg-gray-700 rounded-xl">
+        <div class="text-center">
+          <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+            <i class="fas fa-home text-blue-600 dark:text-blue-400 text-xl"></i>
+          </div>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Type</p>
+          <p class="font-semibold text-gray-900 dark:text-white">{{ property.get_property_type_display }}</p>
+        </div>
+        <div class="text-center">
+          <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+            <i class="fas fa-check-circle text-green-600 dark:text-green-400 text-xl"></i>
+          </div>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Status</p>
+          <p class="font-semibold text-gray-900 dark:text-white">{{ property.get_status_display }}</p>
+        </div>
+        <div class="text-center">
+          <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+            <i class="fas fa-calendar text-purple-600 dark:text-purple-400 text-xl"></i>
+          </div>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Listed</p>
+          <p class="font-semibold text-gray-900 dark:text-white">{{ property.created_at|date:"M d, Y" }}</p>
+        </div>
+        <div class="text-center">
+          <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+            <i class="fas fa-images text-yellow-600 dark:text-yellow-400 text-xl"></i>
+          </div>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Photos</p>
+          <p class="font-semibold text-gray-900 dark:text-white">{{ images|length }}</p>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="mb-8">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+          <i class="fas fa-info-circle text-blue-600"></i>
+          Description
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+          {{ property.description|default:"No description available." }}
+        </p>
+      </div>
+
+      <!-- Owner Info -->
+      <div class="mb-8 p-6 bg-gray-50 dark:bg-gray-700 rounded-xl">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+          <i class="fas fa-user text-blue-600"></i>
+          Property Owner
+        </h2>
+        <div class="flex items-center gap-4">
+          <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+            {{ property.seller.username|slice:":1"|upper }}
+          </div>
+          <div>
+            <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ property.seller.username }}</p>
+            <p class="text-gray-600 dark:text-gray-400">{{ property.seller.email }}</p>
+            {% if property.seller.phone_number %}
+            <p class="text-gray-600 dark:text-gray-400">
+              <i class="fas fa-phone mr-2"></i>{{ property.seller.phone_number }}
+            </p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      {% if property.status == 'AVAILABLE' %}
+      <div class="flex flex-wrap gap-4">
+        {% if has_booking %}
+          <div class="flex-1 py-4 bg-gray-300 text-gray-600 rounded-xl font-semibold text-center">
+            <i class="fas fa-check mr-2"></i>
+            Already Booked
+          </div>
+        {% elif has_approved_visit %}
+          <a href="{% url 'book-property' property.id %}" 
+             class="flex-1 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg text-center">
+            <i class="fas fa-check-circle mr-2"></i>
+            Book This Property
+          </a>
+        {% elif has_pending_visit %}
+          <div class="flex-1 py-4 bg-yellow-100 text-yellow-700 rounded-xl font-semibold text-center">
+            <i class="fas fa-clock mr-2"></i>
+            Visit Request Pending
+          </div>
+        {% else %}
+          <button onclick="openVisitModal()" 
+                  class="flex-1 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg">
+            <i class="fas fa-calendar-check mr-2"></i>
+            Request a Visit
+          </button>
+        {% endif %}
+        
+        <button class="px-6 py-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all">
+          <i class="fas fa-heart"></i>
+        </button>
+        <button class="px-6 py-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all">
+          <i class="fas fa-share-alt"></i>
+        </button>
+      </div>
+      {% else %}
+      <div class="py-4 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-xl font-semibold text-center">
+        <i class="fas fa-info-circle mr-2"></i>
+        This property is not available
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Visit Request Modal -->
+<div id="visitModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
+    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
+      Request a Visit
+    </h3>
+    <p class="text-gray-600 dark:text-gray-300 mb-6">
+      Select your preferred date to visit "{{ property.title }}"
+    </p>
+    <form method="POST" action="{% url 'request-visit' property.id %}">
+      {% csrf_token %}
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Preferred Date
+        </label>
+        <input type="date" name="preferred_date" required
+               min="{{ 'now'|date:'Y-m-d' }}"
+               class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl 
+                      focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                      dark:bg-gray-700 dark:text-white">
+      </div>
+      <div class="flex gap-4">
+        <button type="button" onclick="closeVisitModal()"
+                class="flex-1 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all">
+          Cancel
+        </button>
+        <button type="submit"
+                class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all">
+          Submit Request
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Image Gallery
+  const images = [
+    {% for img in images %}
+    "{{ img.image.url }}"{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ];
+  let currentIndex = 0;
+
+  function showImage(index) {
+    currentIndex = index;
+    document.getElementById('mainImage').src = images[index];
+    document.getElementById('currentImageNum').textContent = index + 1;
+    
+    // Update thumbnail borders
+    const thumbnails = document.querySelectorAll('.thumbnail');
+    thumbnails.forEach((thumb, i) => {
+      if (i === index) {
+        thumb.classList.add('border-blue-500');
+        thumb.classList.remove('border-transparent');
+      } else {
+        thumb.classList.remove('border-blue-500');
+        thumb.classList.add('border-transparent');
+      }
+    });
+  }
+
+  function nextImage() {
+    currentIndex = (currentIndex + 1) % images.length;
+    showImage(currentIndex);
+  }
+
+  function prevImage() {
+    currentIndex = (currentIndex - 1 + images.length) % images.length;
+    showImage(currentIndex);
+  }
+
+  // Visit Modal
+  function openVisitModal() {
+    document.getElementById('visitModal').classList.remove('hidden');
+    document.getElementById('visitModal').classList.add('flex');
+  }
+
+  function closeVisitModal() {
+    document.getElementById('visitModal').classList.add('hidden');
+    document.getElementById('visitModal').classList.remove('flex');
+  }
+
+  // Keyboard navigation for images
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight') nextImage();
+    if (e.key === 'ArrowLeft') prevImage();
+    if (e.key === 'Escape') closeVisitModal();
+  });
+</script>
+{% endblock %}

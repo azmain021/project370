@@ -148,8 +148,8 @@
         <div class="property-card">
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all transform hover:-translate-y-2 group h-full">
             <div class="relative overflow-hidden h-64">
-              {% if property.image %}
-                <img src="{{ property.image.url }}" 
+              {% if property.images.first %}
+                <img src="{{ property.images.first.image.url }}" 
                      alt="{{ property.title }}" 
                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
               {% else %}

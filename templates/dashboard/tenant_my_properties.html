@@ -41,8 +41,8 @@
           <div class="flex">
             <!-- Property Image -->
             <div class="w-40 h-40 flex-shrink-0">
-              {% if item.property.image %}
-                <img src="{{ item.property.image.url }}" alt="{{ item.property.title }}"
+              {% if item.property.images.first %}
+                <img src="{{ item.property.images.first.image.url }}" alt="{{ item.property.title }}"
                      class="w-full h-full object-cover">
               {% else %}
                 <div class="w-full h-full bg-gradient-to-br from-green-400 to-emerald-500 

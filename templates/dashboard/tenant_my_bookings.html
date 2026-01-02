@@ -46,8 +46,8 @@
             <div class="flex items-start gap-4">
               <!-- Property Image -->
               <div class="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0">
-                {% if booking.property.image %}
-                  <img src="{{ booking.property.image.url }}" alt="{{ booking.property.title }}"
+                {% if booking.property.images.first %}
+                  <img src="{{ booking.property.images.first.image.url }}" alt="{{ booking.property.title }}"
                        class="w-full h-full object-cover">
                 {% else %}
                   <div class="w-full h-full bg-gradient-to-br from-green-400 to-emerald-500 

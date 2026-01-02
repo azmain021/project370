@@ -92,16 +92,18 @@
                      bg-white dark:bg-gray-700 text-gray-900 dark:text-white
                      focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
 
-    <!-- 🔴 Image Upload -->
+    <!-- 🔴 Image Upload (Multiple) -->
     <label class="block mb-2 text-gray-900 dark:text-gray-100 font-medium">
-      Property Image
+      Property Images
     </label>
     <input type="file"
-           name="image"
+           name="images"
            accept="image/*"
+           multiple
            class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 mb-6
                   bg-white dark:bg-gray-700 text-gray-900 dark:text-white
                   focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <p class="text-sm text-gray-500 dark:text-gray-400 -mt-4 mb-4">You can select multiple images</p>
 
     <!-- Submit -->
     <button type="submit"

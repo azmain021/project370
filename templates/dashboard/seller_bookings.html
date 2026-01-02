@@ -1,31 +1,67 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4">Bookings</h1>
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <div class="container mx-auto px-4 py-8">
+    
+    <!-- Header -->
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Bookings</h1>
+      <a href="{% url 'seller-dashboard' %}" class="text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+        <i class="fas fa-arrow-left text-xs"></i> Back to Dashboard
+      </a>
+    </div>
 
-    <table class="table-auto w-full border-collapse border">
-        <thead>
-            <tr class="bg-gray-100">
-                <th class="border px-2 py-1">Property</th>
-                <th class="border px-2 py-1">Tenant</th>
-                <th class="border px-2 py-1">Status</th>
-                <th class="border px-2 py-1">Created At</th>
+    <!-- Bookings Table -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+              <th class="text-left py-4 px-6 text-gray-600 dark:text-gray-400 font-semibold">Property</th>
+              <th class="text-left py-4 px-6 text-gray-600 dark:text-gray-400 font-semibold">Tenant</th>
+              <th class="text-left py-4 px-6 text-gray-600 dark:text-gray-400 font-semibold">Status</th>
+              <th class="text-left py-4 px-6 text-gray-600 dark:text-gray-400 font-semibold">Created At</th>
             </tr>
-        </thead>
-        <tbody>
+          </thead>
+          <tbody>
             {% for booking in bookings %}
-            <tr>
-                <td class="border px-2 py-1">{{ booking.property.title }}</td>
-                <td class="border px-2 py-1">{{ booking.tenant.username }}</td>
-                <td class="border px-2 py-1">{{ booking.status }}</td>
-                <td class="border px-2 py-1">{{ booking.created_at }}</td>
+            <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+              <td class="py-4 px-6">
+                <span class="text-gray-900 dark:text-white font-medium">{{ booking.property.title }}</span>
+              </td>
+              <td class="py-4 px-6">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                    {{ booking.tenant.username|slice:":1"|upper }}
+                  </div>
+                  <span class="text-gray-700 dark:text-gray-300">{{ booking.tenant.username }}</span>
+                </div>
+              </td>
+              <td class="py-4 px-6">
+                <span class="px-3 py-1 text-xs rounded-full font-medium
+                  {% if booking.status == 'CONFIRMED' %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
+                  {% elif booking.status == 'PENDING' %}bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400
+                  {% elif booking.status == 'COMPLETED' %}bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400
+                  {% else %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400{% endif %}">
+                  {{ booking.status }}
+                </span>
+              </td>
+              <td class="py-4 px-6 text-gray-500 dark:text-gray-400">{{ booking.created_at|date:"M d, Y" }}</td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="4" class="border px-2 py-1 text-center">No bookings yet.</td>
+              <td colspan="4" class="py-12 text-center">
+                <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i class="fas fa-calendar-times text-gray-400 dark:text-gray-500 text-2xl"></i>
+                </div>
+                <p class="text-gray-500 dark:text-gray-400">No bookings yet.</p>
+              </td>
             </tr>
             {% endfor %}
-        </tbody>
-    </table>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

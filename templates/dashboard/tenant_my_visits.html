@@ -33,8 +33,8 @@
             <div class="flex items-start gap-4">
               <!-- Property Image -->
               <div class="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
-                {% if visit.property.image %}
-                  <img src="{{ visit.property.image.url }}" alt="{{ visit.property.title }}"
+                {% if visit.property.images.first %}
+                  <img src="{{ visit.property.images.first.image.url }}" alt="{{ visit.property.title }}"
                        class="w-full h-full object-cover">
                 {% else %}
                   <div class="w-full h-full bg-gradient-to-br from-blue-400 to-indigo-500 
