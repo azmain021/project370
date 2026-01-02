@@ -233,16 +233,11 @@ class Payment(models.Model):
         return f"Payment {self.id} ({self.status})"
 
 
-# ============================================================================
-# SIGNALS - Auto-update property status when bookings are deleted
-# ============================================================================
+# Signal to auto-update property status when bookings are deleted
 
 @receiver(pre_delete, sender=Booking)
 def reset_property_on_booking_delete(sender, instance, **kwargs):
-    """
-    When a booking is deleted (e.g., user deletion), check if property 
-    should be set back to AVAILABLE.
-    """
+   
     # Only reset if this was a CONFIRMED or PENDING booking
     if instance.status in ['CONFIRMED', 'PENDING']:
         # Check if there are other active bookings for this property
@@ -258,13 +253,9 @@ def reset_property_on_booking_delete(sender, instance, **kwargs):
 
 
 """
-===============================================================================
-SQL EQUIVALENT FOR MODELS.PY (REFERENCE ONLY)
-===============================================================================
+SQL Equivalent for Models (Reference)
 
------------------------------
 TABLE: core_user
------------------------------
 CREATE TABLE core_user (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username VARCHAR(150) UNIQUE NOT NULL,
@@ -283,9 +274,7 @@ CREATE TABLE core_user (
 );
 
 
------------------------------
 TABLE: core_property
------------------------------
 CREATE TABLE core_property (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     seller_id INTEGER NOT NULL,
@@ -302,9 +291,7 @@ CREATE TABLE core_property (
 );
 
 
------------------------------
 TABLE: core_propertyimage
------------------------------
 CREATE TABLE core_propertyimage (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     property_id INTEGER NOT NULL,
@@ -314,9 +301,7 @@ CREATE TABLE core_propertyimage (
 );
 
 
------------------------------
 TABLE: core_visitrequest
------------------------------
 CREATE TABLE core_visitrequest (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     property_id INTEGER NOT NULL,
@@ -331,9 +316,7 @@ CREATE TABLE core_visitrequest (
 );
 
 
------------------------------
 TABLE: core_booking
------------------------------
 CREATE TABLE core_booking (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     property_id INTEGER NOT NULL,
@@ -345,9 +328,7 @@ CREATE TABLE core_booking (
 );
 
 
------------------------------
 TABLE: core_payment
------------------------------
 CREATE TABLE core_payment (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     booking_id INTEGER NOT NULL,
@@ -365,10 +346,7 @@ CREATE TABLE core_payment (
 );
 
 
------------------------------
-SIGNAL LOGIC (pre_delete Booking)
------------------------------
--- Django signal equivalent logic 
+Signal Logic (pre_delete Booking)
 
 IF booking.status IN ('PENDING','CONFIRMED') THEN
     IF NOT EXISTS (
@@ -382,8 +360,4 @@ IF booking.status IN ('PENDING','CONFIRMED') THEN
         WHERE id = booking.property_id;
     END IF;
 END IF;
-
-===============================================================================
-END OF SQL REFERENCE
-===============================================================================
 """

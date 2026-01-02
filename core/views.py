@@ -8,7 +8,7 @@ from django.db.models import Sum
 from .models import User, Property, Booking, Payment, VisitRequest, PropertyImage
 
 
-# home - displays featured properties
+#  displays featured properties
 def home(request):
     # Get all featured properties (no limit - admin can feature as many as they want)
     featured_properties = list(Property.objects.filter(is_featured=True, status="AVAILABLE"))
@@ -16,9 +16,9 @@ def home(request):
     return render(request, "home.html", {"featured_properties": featured_properties})
 
 
-# auth routes - shared by all users
+# auth routes -all users
 
-# login - authenticates user and redirects based on role
+# login  based on role
 def login_view(request):
     next_url = request.POST.get("next") or request.GET.get("next")
 
@@ -41,13 +41,13 @@ def login_view(request):
     return render(request, "registration/login.html")
 
 
-# logout - logs out user and redirects to login
+# logout 
 def logout_view(request):
     logout(request)
     return redirect("login")
 
 
-# register - creates new tenant or seller account
+# register  new tenant or seller account
 def register_view(request):
     if request.user.is_authenticated:
         return redirect("role-redirect")
@@ -111,14 +111,14 @@ def register_view(request):
             password=password
         )
 
-        # Auto login after registration
+        # Auto login 
         login(request, user)
         return redirect("role-redirect")
 
     return render(request, "registration/register.html")
 
 
-# role_redirect - sends user to correct dashboard based on role
+# role_redirect 
 @login_required
 def role_redirect(request):
     user = request.user
@@ -133,9 +133,9 @@ def role_redirect(request):
     return redirect("home")
 
 
-# admin routes - made by azmain
+# admin routes -  azmain
 
-# admin_dashboard - shows overview stats for admin
+# admin_dashboard 
 @login_required
 def admin_dashboard(request):
     if request.user.role != "ADMIN":
@@ -168,7 +168,7 @@ def admin_dashboard(request):
     return render(request, "dashboard/admin_dashboard.html", context)
 
 
-# admin_users - lists all users, allows deletion
+#  lists  users,deletion
 @login_required
 def admin_users(request):
     if request.user.role != "ADMIN":
@@ -196,7 +196,7 @@ def admin_users(request):
     return render(request, "dashboard/admin_users.html", context)
 
 
-# admin_add_user - creates new user account
+#  creates new user 
 @login_required
 def admin_add_user(request):
     if request.user.role != "ADMIN":
@@ -222,7 +222,7 @@ def admin_add_user(request):
     return render(request, "dashboard/admin_add_user.html")
 
 
-# admin_properties - lists all properties, toggle featured, delete
+# a lists  properties,feature prop, delete
 @login_required
 def admin_properties(request):
     if request.user.role != "ADMIN":
@@ -237,7 +237,7 @@ def admin_properties(request):
             prop = Property.objects.get(id=prop_id)
             
             if action == "toggle_featured":
-                # Only allow featuring if property is not SOLD
+                
                 if prop.status != "SOLD":
                     prop.is_featured = not prop.is_featured
                     prop.save()
@@ -257,7 +257,7 @@ def admin_properties(request):
     return render(request, "dashboard/admin_properties.html", context)
 
 
-# admin_add_property - creates new property for a seller
+#creates new property for a seller
 @login_required
 def admin_add_property(request):
     if request.user.role != "ADMIN":
@@ -287,7 +287,7 @@ def admin_add_property(request):
             description=description,
         )
 
-        # Handle multiple images
+        # Handle mimages
         images = request.FILES.getlist("images")
         for img in images:
             PropertyImage.objects.create(property=prop, image=img)
@@ -300,13 +300,13 @@ def admin_add_property(request):
     return render(request, "dashboard/admin_add_property.html", context)
 
 
-# admin_payments - approves payments and sends to seller
+# approves payments and sends to seller
 @login_required
 def admin_payments(request):
     if request.user.role != "ADMIN":
         return redirect("home")
 
-    # If admin clicked "Approve" button or "Send to Seller" button
+    # I "Send to Seller" button
     if request.method == "POST":
         action = request.POST.get("action")
         payment_id = request.POST.get("payment_id")
@@ -318,9 +318,10 @@ def admin_payments(request):
 
         if payment:
             if action == "approve":
-                # Only approve if currently pending
+              
                 if payment.status == "PENDING":
-                    # 10% platform cut example
+                    
+                    # Platform fee is 10%
                     payment.platform_cut = payment.amount * Decimal('0.10')
                     payment.seller_amount = payment.amount - payment.platform_cut
 
@@ -328,7 +329,7 @@ def admin_payments(request):
                     payment.approved_by_admin = request.user
                     payment.approved_at = timezone.now()
                     
-                    # Mark property as BOOKED (sold) if it's a SELL property
+                    
                     if payment.booking.property.property_type == "SELL":
                         payment.booking.property.status = "BOOKED"
                         payment.booking.property.save()
@@ -336,7 +337,7 @@ def admin_payments(request):
                     payment.save()
             
             elif action == "send_to_seller":
-                # Only send if approved and not already sent
+                # Only send if approved 
                 if payment.status == "APPROVED" and not payment.seller_amount_sent:
                     payment.seller_amount_sent = True
                     payment.seller_amount_sent_at = timezone.now()
@@ -344,7 +345,7 @@ def admin_payments(request):
 
         return redirect("admin-payments")
 
-    # Show pending and recently approved payments
+    # pending and recently approved payments
     pending_payments = Payment.objects.filter(status="PENDING").select_related(
         "booking__property",
         "booking__tenant"
@@ -358,7 +359,7 @@ def admin_payments(request):
         "approved_by_admin"
     )
 
-    # Calculate total platform cuts for all approved payments
+    # Calculate fee
     total_platform_cut = sum(p.platform_cut for p in approved_payments)
 
     context = {
@@ -370,12 +371,12 @@ def admin_payments(request):
     return render(request, "dashboard/admin_payments.html", context)
 
 
-# admin_deals - shows completed transactions where seller received payment
+#shows completed transactions
 def admin_deals(request):
     if request.user.role != "ADMIN":
         return redirect("home")
 
-    # Get all completed deals (payments where seller amount has been sent)
+    
     completed_deals = Payment.objects.filter(
         seller_amount_sent=True
     ).select_related(
@@ -391,9 +392,9 @@ def admin_deals(request):
     return render(request, "dashboard/admin_deals.html", context)
 
 
-# tenant routes - made by tanzeem
+# tenant routes - tanzeem
 
-# property_detail - shows property with all images and booking options
+#  shows property with all images and booking options
 @login_required
 def property_detail(request, property_id):
     if request.user.role != "TENANT":
@@ -402,21 +403,21 @@ def property_detail(request, property_id):
     prop = get_object_or_404(Property, id=property_id)
     images = prop.images.all()
 
-    # Check if tenant already has a pending visit request
+    
     has_pending_visit = VisitRequest.objects.filter(
         property=prop,
         tenant=request.user,
         status="PENDING"
     ).exists()
 
-    # Check if tenant has an approved visit
+   
     has_approved_visit = VisitRequest.objects.filter(
         property=prop,
         tenant=request.user,
         status="APPROVED"
     ).exists()
 
-    # Check if tenant already has a booking for this property
+    
     has_booking = Booking.objects.filter(
         property=prop,
         tenant=request.user,
@@ -434,16 +435,16 @@ def property_detail(request, property_id):
     return render(request, "dashboard/property_detail.html", context)
 
 
-# tenant_dashboard - shows available properties for tenant
+#  available properties for tenant
 @login_required
 def tenant_dashboard(request):
     if request.user.role != "TENANT":
         return redirect("home")
 
-    # Fetch available properties only (exclude BOOKED/SOLD properties)
+    
     properties = Property.objects.select_related("seller").filter(status="AVAILABLE")
 
-    # Count confirmed/purchased properties (completed bookings with approved payments)
+   
     confirmed_properties_count = Booking.objects.filter(
         tenant=request.user,
         status="COMPLETED",
@@ -458,7 +459,7 @@ def tenant_dashboard(request):
     return render(request, "dashboard/tenant_dashboard.html", context)
 
 
-# request_visit - tenant submits visit request for property
+# visit request for property
 @login_required
 def request_visit(request, property_id):
     if request.user.role != "TENANT":
@@ -472,7 +473,7 @@ def request_visit(request, property_id):
 
         preferred_date = request.POST.get("preferred_date")
 
-        # Check if tenant already has a pending request for this property
+        #  tenant  pending request
         existing = VisitRequest.objects.filter(
             property=prop,
             tenant=request.user,
@@ -492,13 +493,13 @@ def request_visit(request, property_id):
     return redirect("tenant-dashboard")
 
 
-# tenant_my_visits - shows tenant's visit requests
+#  shows tenant's visit requests
 @login_required
 def tenant_my_visits(request):
     if request.user.role != "TENANT":
         return redirect("home")
 
-    # Get property IDs where tenant has completed payment (COMPLETED bookings)
+    # property IDs where tenant has completed payment 
     completed_property_ids = set(
         Booking.objects.filter(
             tenant=request.user,
@@ -506,14 +507,14 @@ def tenant_my_visits(request):
         ).values_list("property_id", flat=True)
     )
 
-    # Exclude visits for properties that have been paid/completed
+    
     visits = VisitRequest.objects.filter(tenant=request.user).exclude(
         property_id__in=completed_property_ids
     ).select_related(
         "property", "agent"
     ).order_by("-created_at")
 
-    # Get property IDs that tenant has already booked (PENDING or CONFIRMED)
+    
     booked_property_ids = set(
         Booking.objects.filter(
             tenant=request.user,
@@ -521,12 +522,12 @@ def tenant_my_visits(request):
         ).values_list("property_id", flat=True)
     )
 
-    # Get property IDs that are already confirmed by anyone
+    
     confirmed_property_ids = set(
         Booking.objects.filter(status="CONFIRMED").values_list("property_id", flat=True)
     )
 
-    # Add a flag to each visit indicating if booking is allowed
+    # Add a flag 
     for visit in visits:
         visit.can_book = (
             visit.status == "APPROVED" and
@@ -543,7 +544,7 @@ def tenant_my_visits(request):
     return render(request, "dashboard/tenant_my_visits.html", context)
 
 
-# admin_visit_requests - admin approves/rejects visit requests, assigns agents
+# admin approves/rejects visit requests, assigns agents - Azmain
 @login_required
 def admin_visit_requests(request):
     if request.user.role != "ADMIN":
@@ -598,7 +599,7 @@ def admin_visit_requests(request):
     return render(request, "dashboard/admin_visit_requests.html", context)
 
 
-# book_property - tenant books property after visit approved
+# tenant books property after visit approved
 @login_required
 def book_property(request, property_id):
     if request.user.role != "TENANT":
@@ -610,14 +611,14 @@ def book_property(request, property_id):
         except Property.DoesNotExist:
             return redirect("tenant-my-visits")
 
-        # Check if tenant already has an active booking (PENDING or CONFIRMED) for this property
+        # Check if tenant already has an active booking 
         existing = Booking.objects.filter(
             property=prop,
             tenant=request.user,
             status__in=["PENDING", "CONFIRMED"]
         ).exists()
 
-        # Also check if property is already booked by someone else
+        #  check if property is already booked by someone else
         property_booked = Booking.objects.filter(
             property=prop,
             status="CONFIRMED"
@@ -635,7 +636,7 @@ def book_property(request, property_id):
     return redirect("tenant-my-visits")
 
 
-# tenant_my_bookings - shows tenant's pending and confirmed bookings
+# tenant's pending and confirmed bookings
 @login_required
 def tenant_my_bookings(request):
     if request.user.role != "TENANT":
@@ -655,19 +656,19 @@ def tenant_my_bookings(request):
     return render(request, "dashboard/tenant_my_bookings.html", context)
 
 
-# tenant_my_properties - shows tenant's purchased properties
+# ttenant's purchased properties
 @login_required
 def tenant_my_properties(request):
     if request.user.role != "TENANT":
         return redirect("home")
 
-    # Get all completed bookings with approved payments
+    
     completed_bookings = Booking.objects.filter(
         tenant=request.user,
         status="COMPLETED"
     ).select_related("property", "property__seller").prefetch_related("payments")
 
-    # Build list of paid properties with payment info
+   
     paid_properties = []
     for booking in completed_bookings:
         payment = booking.payments.filter(status="APPROVED").first()
@@ -685,7 +686,7 @@ def tenant_my_properties(request):
     return render(request, "dashboard/tenant_my_properties.html", context)
 
 
-# admin_bookings - admin confirms or cancels booking requests
+# admin confirms or cancels booking requests
 @login_required
 def admin_bookings(request):
     if request.user.role != "ADMIN":
@@ -733,7 +734,7 @@ def admin_bookings(request):
     return render(request, "dashboard/admin_bookings.html", context)
 
 
-# initiate_payment - tenant pays for confirmed booking, marks property as sold
+# tenant pays for confirmed booking, marks property as sold
 @login_required
 def initiate_payment(request, booking_id):
     if request.user.role != "TENANT":
@@ -753,7 +754,7 @@ def initiate_payment(request, booking_id):
         platform_cut = amount * Decimal('0.10')
         seller_amount = amount - platform_cut
         
-        # Create payment record - auto-approved (no admin approval needed)
+        
         Payment.objects.create(
             booking=booking,
             amount=amount,
@@ -763,7 +764,7 @@ def initiate_payment(request, booking_id):
             approved_at=timezone.now()
         )
         
-        # Mark booking as COMPLETED (so Pay Now button disappears)
+        # Mark booking as COMPLETED 
         booking.status = "COMPLETED"
         booking.save()
         
@@ -775,7 +776,7 @@ def initiate_payment(request, booking_id):
     return redirect("payment-confirmation", booking_id=booking_id)
 
 
-# payment_confirmation - shows payment success page
+# shows payment success page
 @login_required
 def payment_confirmation(request, booking_id):
     if request.user.role != "TENANT":
@@ -797,7 +798,7 @@ def payment_confirmation(request, booking_id):
 
 # seller routes - made by saud
 
-# seller_dashboard - shows seller stats, properties, bookings, payments
+# shows seller stats, properties, bookings, payments
 @login_required
 def seller_dashboard(request):
     if request.user.role != "SELLER":
@@ -806,17 +807,17 @@ def seller_dashboard(request):
     seller = request.user
     properties = Property.objects.filter(seller=seller).order_by("-created_at")
     
-    # Get bookings for seller's properties
+   
     bookings = Booking.objects.filter(property__seller=seller).select_related(
         "property", "tenant"
     ).order_by("-created_at")
     
-    # Get appointments (visit requests) for seller's properties
+   
     appointments = VisitRequest.objects.filter(property__seller=seller).select_related(
         "property", "tenant"
     ).order_by("-created_at")
     
-    # Only count payments that admin has sent to seller (seller_amount_sent=True)
+    
     payments_sent = Payment.objects.filter(
         booking__property__seller=seller,
         status="APPROVED",
@@ -824,7 +825,7 @@ def seller_dashboard(request):
     )
     payments_total = payments_sent.aggregate(Sum("seller_amount"))["seller_amount__sum"] or 0
     
-    # Pending payments (approved by admin but not yet sent to seller)
+    
     pending_payments = Payment.objects.filter(
         booking__property__seller=seller,
         status="APPROVED",
@@ -841,7 +842,7 @@ def seller_dashboard(request):
     return render(request, "dashboard/seller_dashboard.html", context)
 
 
-# seller_properties - lists seller's properties
+#  seller's properties
 @login_required
 def seller_properties(request):
     if request.user.role != "SELLER":
@@ -853,7 +854,7 @@ def seller_properties(request):
     return render(request, "dashboard/seller_properties.html", context)
 
 
-# add_property - seller creates new property listing
+# creates new property listing
 @login_required
 def add_property(request):
     if request.user.role != "SELLER":
@@ -886,7 +887,7 @@ def add_property(request):
     return render(request, "dashboard/seller_add_property.html")
 
 
-# edit_property - seller updates property details and images
+# updates property details and images
 @login_required
 def edit_property(request, property_id):
     prop = get_object_or_404(Property, id=property_id, seller=request.user)
@@ -919,7 +920,7 @@ def edit_property(request, property_id):
     return render(request, "dashboard/seller_add_property.html", context)
 
 
-# delete_property - seller removes property listing
+# dedlete property listing
 @login_required
 def delete_property(request, property_id):
     prop = get_object_or_404(Property, id=property_id, seller=request.user)
@@ -928,7 +929,7 @@ def delete_property(request, property_id):
     return redirect("seller_properties")
 
 
-# seller_appointments - shows visit requests for seller's properties
+#  visit requests for seller's properties
 @login_required
 def seller_appointments(request):
     if request.user.role != "SELLER":
@@ -943,7 +944,7 @@ def seller_appointments(request):
     return render(request, "dashboard/seller_appointments.html", context)
 
 
-# seller_bookings - shows bookings for seller's properties
+#  bookings for seller's properties
 @login_required
 def seller_bookings(request):
     if request.user.role != "SELLER":
@@ -958,13 +959,13 @@ def seller_bookings(request):
     return render(request, "dashboard/seller_bookings.html", context)
 
 
-# seller_payments - shows received and pending payments for seller
+# shows received and pending payments for seller
 @login_required
 def seller_payments(request):
     if request.user.role != "SELLER":
         return redirect("home")
 
-    # Only show payments that admin has approved AND sent to seller
+   
     payments = Payment.objects.filter(
         booking__property__seller=request.user,
         status="APPROVED",
@@ -973,7 +974,7 @@ def seller_payments(request):
         "booking", "booking__property", "booking__tenant"
     ).order_by("-seller_amount_sent_at")
     
-    # Also get pending payments (approved but not sent yet) for info
+   
     pending_payments = Payment.objects.filter(
         booking__property__seller=request.user,
         status="APPROVED",
@@ -991,169 +992,223 @@ def seller_payments(request):
 
 
 """
-================================================================================
-SQL EQUIVALENT QUERIES
-================================================================================
+SQL Queries Reference
 
-ADMIN ROUTES - made by azmain
-================================================================================
+Raw SQL equivalents of the Django ORM calls used in each view function.
 
-admin_dashboard - shows overview stats for admin
 
-User.objects.count()
+SHARED ROUTES
+
+home()
+SELECT * FROM core_property WHERE is_featured = 1 AND status = 'AVAILABLE';
+
+register_view()
+SELECT 1 FROM core_user WHERE username = ? LIMIT 1;
+SELECT 1 FROM core_user WHERE email = ? LIMIT 1;
+INSERT INTO core_user (username, email, first_name, last_name, phone_number, address, role, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+
+ADMIN ROUTES (azmain)
+
+admin_dashboard()
 SELECT COUNT(*) FROM core_user;
-
-User.objects.filter(role="SELLER").count()
 SELECT COUNT(*) FROM core_user WHERE role = 'SELLER';
-
-User.objects.filter(role="TENANT").count()
 SELECT COUNT(*) FROM core_user WHERE role = 'TENANT';
-
-Property.objects.count()
 SELECT COUNT(*) FROM core_property;
-
-Booking.objects.count()
 SELECT COUNT(*) FROM core_booking;
-
-Payment.objects.count()
 SELECT COUNT(*) FROM core_payment;
-
-Payment.objects.filter(seller_amount_sent=True).count()
-SELECT COUNT(*) FROM core_payment WHERE seller_amount_sent = TRUE;
-
-Payment.objects.filter(status="PENDING").count()
+SELECT COUNT(*) FROM core_payment WHERE seller_amount_sent = 1;
 SELECT COUNT(*) FROM core_payment WHERE status = 'PENDING';
-
-VisitRequest.objects.filter(status="PENDING").count()
 SELECT COUNT(*) FROM core_visitrequest WHERE status = 'PENDING';
-
-Booking.objects.filter(status="PENDING").count()
 SELECT COUNT(*) FROM core_booking WHERE status = 'PENDING';
 
-
-admin_users - lists all users, allows deletion
-
-User.objects.filter(role="SELLER")
+admin_users()
 SELECT * FROM core_user WHERE role = 'SELLER';
-
-User.objects.filter(role="TENANT")
 SELECT * FROM core_user WHERE role = 'TENANT';
-
-User.objects.filter(role="AGENT")
 SELECT * FROM core_user WHERE role = 'AGENT';
+DELETE FROM core_user WHERE id = ?;
 
-User.objects.get(id=user_id)
-SELECT * FROM core_user WHERE id = user_id;
+admin_add_user()
+INSERT INTO core_user (username, email, phone_number, role, password) VALUES (?, ?, ?, ?, ?);
 
-u.delete()
-DELETE FROM core_user WHERE id = user_id;
+admin_properties()
+SELECT p.*, u.* FROM core_property p JOIN core_user u ON p.seller_id = u.id;
+UPDATE core_property SET is_featured = NOT is_featured WHERE id = ?;
+DELETE FROM core_property WHERE id = ?;
 
+admin_add_property()
+INSERT INTO core_property (seller_id, title, address, city, property_type, price, description) VALUES (?, ?, ?, ?, ?, ?, ?);
+INSERT INTO core_propertyimage (property_id, image) VALUES (?, ?);
 
-admin_add_user - creates new user account
+admin_payments()
+SELECT * FROM core_payment WHERE id = ?;
+UPDATE core_payment SET status = 'APPROVED', platform_cut = ?, seller_amount = ?, approved_by_admin_id = ?, approved_at = ? WHERE id = ?;
+UPDATE core_payment SET seller_amount_sent = 1, seller_amount_sent_at = ? WHERE id = ?;
 
-User.objects.create_user(username, email, phone_number, role, password)
-INSERT INTO core_user (username, email, phone_number, role, password) 
-VALUES ('username', 'email', 'phone', 'role', 'hashed_password');
+admin_deals()
+SELECT p.*, b.*, prop.*, s.*, t.* FROM core_payment p
+JOIN core_booking b ON p.booking_id = b.id
+JOIN core_property prop ON b.property_id = prop.id
+JOIN core_user s ON prop.seller_id = s.id
+JOIN core_user t ON b.tenant_id = t.id
+WHERE p.seller_amount_sent = 1 ORDER BY p.seller_amount_sent_at DESC;
 
+admin_visit_requests()
+SELECT v.*, p.*, t.* FROM core_visitrequest v
+JOIN core_property p ON v.property_id = p.id
+JOIN core_user t ON v.tenant_id = t.id
+WHERE v.status = 'PENDING' ORDER BY v.created_at DESC;
 
-admin_properties - lists all properties, toggle featured, delete
+SELECT v.*, p.*, t.*, a.* FROM core_visitrequest v
+JOIN core_property p ON v.property_id = p.id
+JOIN core_user t ON v.tenant_id = t.id
+LEFT JOIN core_user a ON v.agent_id = a.id
+WHERE v.status = 'APPROVED' ORDER BY v.created_at DESC LIMIT 10;
 
-Property.objects.select_related("seller").all()
-SELECT p.*, u.* FROM core_property p 
-JOIN core_user u ON p.seller_id = u.id;
+UPDATE core_visitrequest SET status = 'APPROVED', agent_id = ? WHERE id = ?;
+UPDATE core_visitrequest SET status = 'REJECTED' WHERE id = ?;
 
-Property.objects.get(id=prop_id)
-SELECT * FROM core_property WHERE id = prop_id;
+admin_bookings()
+SELECT b.*, p.*, t.* FROM core_booking b
+JOIN core_property p ON b.property_id = p.id
+JOIN core_user t ON b.tenant_id = t.id
+WHERE b.status = 'PENDING' ORDER BY b.created_at DESC;
 
-prop.is_featured = not prop.is_featured; prop.save()
-UPDATE core_property SET is_featured = NOT is_featured WHERE id = prop_id;
-
-prop.delete()
-DELETE FROM core_property WHERE id = prop_id;
-
-
-admin_add_property - creates new property for a seller
-
-Property.objects.create(seller, title, address, city, property_type, price, description)
-INSERT INTO core_property (seller_id, title, address, city, property_type, price, description)
-VALUES (seller_id, 'title', 'address', 'city', 'type', price, 'description');
-
-PropertyImage.objects.create(property=prop, image=img)
-INSERT INTO core_propertyimage (property_id, image) VALUES (prop_id, 'image_path');
-
-
-admin_payments - approves payments and sends to seller
-
-Payment.objects.get(id=payment_id)
-SELECT * FROM core_payment WHERE id = payment_id;
-
-UPDATE core_payment 
-SET status = 'APPROVED', platform_cut = x, seller_amount = y,
-    approved_by_admin_id = admin_id, approved_at = now
-WHERE id = payment_id;
-
-UPDATE core_payment 
-SET seller_amount_sent = TRUE, seller_amount_sent_at = now 
-WHERE id = payment_id;
+UPDATE core_booking SET status = 'CONFIRMED' WHERE id = ?;
+UPDATE core_property SET status = 'BOOKED' WHERE id = ?;
+UPDATE core_booking SET status = 'CANCELLED' WHERE id = ?;
 
 
-================================================================================
-TENANT ROUTES - made by tanzeem
-================================================================================
+TENANT ROUTES (tanzeem)
 
-tenant_dashboard - shows available properties
-
-Property.objects.select_related("seller").filter(status="AVAILABLE")
-SELECT p.*, u.* FROM core_property p 
-JOIN core_user u ON p.seller_id = u.id 
+tenant_dashboard()
+SELECT p.*, u.* FROM core_property p
+JOIN core_user u ON p.seller_id = u.id
 WHERE p.status = 'AVAILABLE';
 
+SELECT COUNT(DISTINCT b.id) FROM core_booking b
+JOIN core_payment pay ON pay.booking_id = b.id
+WHERE b.tenant_id = ? AND b.status = 'COMPLETED' AND pay.status = 'APPROVED';
 
-property_detail - shows property with images and booking options
+property_detail()
+SELECT * FROM core_property WHERE id = ?;
+SELECT * FROM core_propertyimage WHERE property_id = ?;
+SELECT 1 FROM core_visitrequest WHERE property_id = ? AND tenant_id = ? AND status = 'PENDING' LIMIT 1;
+SELECT 1 FROM core_visitrequest WHERE property_id = ? AND tenant_id = ? AND status = 'APPROVED' LIMIT 1;
+SELECT 1 FROM core_booking WHERE property_id = ? AND tenant_id = ? AND status IN ('PENDING', 'CONFIRMED', 'COMPLETED') LIMIT 1;
 
-SELECT * FROM core_property WHERE id = property_id;
-SELECT * FROM core_propertyimage WHERE property_id = prop_id;
+request_visit()
+SELECT 1 FROM core_visitrequest WHERE property_id = ? AND tenant_id = ? AND status = 'PENDING' LIMIT 1;
+INSERT INTO core_visitrequest (property_id, tenant_id, preferred_date, status, created_at) VALUES (?, ?, ?, 'PENDING', ?);
+
+tenant_my_visits()
+SELECT property_id FROM core_booking WHERE tenant_id = ? AND status = 'COMPLETED';
+SELECT v.*, p.*, a.* FROM core_visitrequest v
+JOIN core_property p ON v.property_id = p.id
+LEFT JOIN core_user a ON v.agent_id = a.id
+WHERE v.tenant_id = ? AND v.property_id NOT IN (?) ORDER BY v.created_at DESC;
+SELECT property_id FROM core_booking WHERE tenant_id = ? AND status IN ('PENDING', 'CONFIRMED');
+SELECT property_id FROM core_booking WHERE status = 'CONFIRMED';
+
+book_property()
+SELECT 1 FROM core_booking WHERE property_id = ? AND tenant_id = ? AND status IN ('PENDING', 'CONFIRMED') LIMIT 1;
+SELECT 1 FROM core_booking WHERE property_id = ? AND status = 'CONFIRMED' LIMIT 1;
+INSERT INTO core_booking (property_id, tenant_id, status, created_at) VALUES (?, ?, 'PENDING', ?);
+
+tenant_my_bookings()
+SELECT b.*, p.*, s.* FROM core_booking b
+JOIN core_property p ON b.property_id = p.id
+JOIN core_user s ON p.seller_id = s.id
+WHERE b.tenant_id = ? AND b.status != 'COMPLETED' ORDER BY b.created_at DESC;
+
+tenant_my_properties()
+SELECT b.*, p.*, s.*, pay.* FROM core_booking b
+JOIN core_property p ON b.property_id = p.id
+JOIN core_user s ON p.seller_id = s.id
+JOIN core_payment pay ON pay.booking_id = b.id
+WHERE b.tenant_id = ? AND b.status = 'COMPLETED' AND pay.status = 'APPROVED';
+
+initiate_payment()
+SELECT * FROM core_booking WHERE id = ? AND tenant_id = ? AND status = 'CONFIRMED';
+SELECT 1 FROM core_payment WHERE booking_id = ? LIMIT 1;
+INSERT INTO core_payment (booking_id, amount, platform_cut, seller_amount, status, approved_at) VALUES (?, ?, ?, ?, 'APPROVED', ?);
+UPDATE core_booking SET status = 'COMPLETED' WHERE id = ?;
+UPDATE core_property SET status = 'SOLD', is_featured = 0 WHERE id = ?;
+
+payment_confirmation()
+SELECT * FROM core_booking WHERE id = ? AND tenant_id = ?;
+SELECT * FROM core_payment WHERE booking_id = ?;
 
 
-request_visit - tenant submits visit request
+SELLER ROUTES (saud)
 
-INSERT INTO core_visitrequest (property_id, tenant_id, preferred_date, status, created_at)
-VALUES (prop_id, user_id, 'date', 'PENDING', now);
-
-
-================================================================================
-SELLER ROUTES - made by saud
-================================================================================
-
-seller_dashboard - seller stats
-
-SELECT * FROM core_property WHERE seller_id = seller_id ORDER BY created_at DESC;
+seller_dashboard()
+SELECT * FROM core_property WHERE seller_id = ? ORDER BY created_at DESC;
 
 SELECT b.*, p.*, t.* FROM core_booking b
 JOIN core_property p ON b.property_id = p.id
 JOIN core_user t ON b.tenant_id = t.id
-WHERE p.seller_id = seller_id ORDER BY b.created_at DESC;
+WHERE p.seller_id = ? ORDER BY b.created_at DESC;
 
+SELECT v.*, p.*, t.* FROM core_visitrequest v
+JOIN core_property p ON v.property_id = p.id
+JOIN core_user t ON v.tenant_id = t.id
+WHERE p.seller_id = ? ORDER BY v.created_at DESC;
 
-================================================================================
-SHARED ROUTES
-================================================================================
+SELECT SUM(seller_amount) FROM core_payment pay
+JOIN core_booking b ON pay.booking_id = b.id
+JOIN core_property p ON b.property_id = p.id
+WHERE p.seller_id = ? AND pay.status = 'APPROVED' AND pay.seller_amount_sent = 1;
 
-home - displays featured properties
+SELECT SUM(seller_amount) FROM core_payment pay
+JOIN core_booking b ON pay.booking_id = b.id
+JOIN core_property p ON b.property_id = p.id
+WHERE p.seller_id = ? AND pay.status = 'APPROVED' AND pay.seller_amount_sent = 0;
 
-Property.objects.filter(is_featured=True, status="AVAILABLE")
-SELECT * FROM core_property WHERE is_featured = TRUE AND status = 'AVAILABLE';
+seller_properties()
+SELECT * FROM core_property WHERE seller_id = ? ORDER BY created_at DESC;
 
+add_property()
+INSERT INTO core_property (title, description, address, city, price, property_type, seller_id) VALUES (?, ?, ?, ?, ?, ?, ?);
+INSERT INTO core_propertyimage (property_id, image) VALUES (?, ?);
 
-register - creates new tenant or seller
+edit_property()
+SELECT * FROM core_property WHERE id = ? AND seller_id = ?;
+UPDATE core_property SET title = ?, description = ?, address = ?, city = ?, price = ?, property_type = ? WHERE id = ?;
+INSERT INTO core_propertyimage (property_id, image) VALUES (?, ?);
+DELETE FROM core_propertyimage WHERE id IN (?) AND property_id = ?;
 
-User.objects.filter(username=username).exists()
-SELECT 1 FROM core_user WHERE username = 'username' LIMIT 1;
+delete_property()
+SELECT * FROM core_property WHERE id = ? AND seller_id = ?;
+DELETE FROM core_property WHERE id = ?;
 
-User.objects.filter(email=email).exists()
-SELECT 1 FROM core_user WHERE email = 'email' LIMIT 1;
+seller_appointments()
+SELECT * FROM core_property WHERE seller_id = ?;
+SELECT v.*, p.*, t.*, a.* FROM core_visitrequest v
+JOIN core_property p ON v.property_id = p.id
+JOIN core_user t ON v.tenant_id = t.id
+LEFT JOIN core_user a ON v.agent_id = a.id
+WHERE p.seller_id = ? ORDER BY v.created_at DESC;
 
-User.objects.create_user(username, email, first_name, last_name, phone_number, address, role, password)
-INSERT INTO core_user (username, email, first_name, last_name, phone_number, address, role, password)
-VALUES ('username', 'email', 'first', 'last', 'phone', 'address', 'role', 'hashed_password');
+seller_bookings()
+SELECT * FROM core_property WHERE seller_id = ?;
+SELECT b.*, p.*, t.* FROM core_booking b
+JOIN core_property p ON b.property_id = p.id
+JOIN core_user t ON b.tenant_id = t.id
+WHERE p.seller_id = ? ORDER BY b.created_at DESC;
+
+seller_payments()
+SELECT pay.*, b.*, p.*, t.* FROM core_payment pay
+JOIN core_booking b ON pay.booking_id = b.id
+JOIN core_property p ON b.property_id = p.id
+JOIN core_user t ON b.tenant_id = t.id
+WHERE p.seller_id = ? AND pay.status = 'APPROVED' AND pay.seller_amount_sent = 1
+ORDER BY pay.seller_amount_sent_at DESC;
+
+SELECT pay.*, b.*, p.*, t.* FROM core_payment pay
+JOIN core_booking b ON pay.booking_id = b.id
+JOIN core_property p ON b.property_id = p.id
+JOIN core_user t ON b.tenant_id = t.id
+WHERE p.seller_id = ? AND pay.status = 'APPROVED' AND pay.seller_amount_sent = 0
+ORDER BY pay.approved_at DESC;
 """
